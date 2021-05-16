@@ -1,0 +1,14 @@
+---
+- name: restart nginx docker
+  docker_compose:
+    project_src: "{{ user_path }}/openresty"
+    restarted: yes
+#    recreate: always
+
+- name: restart nginx stack
+  docker_stack:
+    state: present
+    prune: yes
+    name: nginx
+    compose:
+      - "{{ user_path }}/openresty/docker-compose.yml"

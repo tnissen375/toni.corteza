@@ -1,0 +1,17 @@
+---
+roles:
+ - name: geerlingguy.pip
+ - name: atosatto.docker-swarm
+ - name: geerlingguy.ntp
+ - name: geerlingguy.nfs 
+ - name: toni.certificates
+   src: git+https://github.com/tnissen375/toni.certificates.git
+ - name: toni.docker
+   src: git+https://github.com/tnissen375/toni.docker.git
+ - name: toni.openresty
+   src: git+https://github.com/tnissen375/toni.openresty.git
+ - name: toni.buildimages
+   src: git+https://github.com/tnissen375/toni.buildimages.git
+ - name: toni.base
+   src: git+https://github.com/tnissen375/toni.base.git
+

@@ -1,0 +1,32 @@
+---
+user: "root"
+user_path: "/root"
+deploy_name: "{{ role_name }}"
+nginx_subdomain: "corteza."
+nginx_network_name: "nginx_net"
+create_stack_network: false
+#stack_network_name: "corteza_net" -> add to openresty stack
+stack_subnet: "10.10.15.0/24"
+nginx_upstream: "http://{{ deploy_name }}:80"
+external_domain: "{{ nginx_subdomain }}{{ nginx_domain }}"
+#keycloak_domain: ""
+#keycloak_realm: ""
+#keycloak_secret: ""
+include_auth: "false"
+access_group: "web"
+corteza_mysql_image: "percona:8.0"
+image_version: "2021.3.4"
+corteza_image: "cortezaproject/corteza-server:{{ image_version }}"
+pdf_image_version: "6"
+pdf_image: "thecodingmachine/gotenberg:{{ pdf_image_version }}"
+corteza_mysql_root_password: "pDsQ2Ahh4W2ojDb4vGeh05n" #dummy, replace in group_vars/all.yml
+corteza_mysql_password: "pDsQsg62AW2ojDb4vGeh05nxy" #dummy, replace in group_vars/all.yml
+
+nginx_conf_dir: "/etc/nginx"
+container_cert_path: "/etc/ssl/dummy-ssl-fallback.crt"
+container_key_path: "/etc/ssl/dummy-ssl-fallback.key"
+
+dir_exists:
+  - "/etc/nginx/conf.d"
+  - "{{ user_path }}/{{ deploy_name }}"
+  - "/data/{{ deploy_name }}/{{ deploy_name }}-vol"

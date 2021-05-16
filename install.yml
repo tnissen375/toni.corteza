@@ -1,0 +1,56 @@
+- hosts: swarm-01
+  remote_user: root
+  gather_facts: yes
+  roles:
+    - {
+        role: toni.base,
+        configure_ipv4_hostname: true,
+        configure_ipv6_hostname: false,
+        configure_firewall: 'true'
+      }
+    - {
+        role: geerlingguy.ntp,
+        ntp_manage_config: true,
+        ntp_servers: [
+          0.de.pool.ntp.org,
+          1.de.pool.ntp.org,
+          2.de.pool.ntp.org,
+          3.de.pool.ntp.org
+        ]
+      }      
+
+
+- hosts: swarm-01
+  remote_user: root
+  gather_facts: yes
+  roles:
+    - {
+        role: toni.docker,
+        docker_network_driver: 'overlay', #trigger swarm
+        swarm_interface: "{{ ansible_default_ipv4['interface'] }}" #default wg0
+      }
+    - {
+        role : toni.buildimages
+      }      
+    - {
+        role: toni.openresty,
+        #docker_network_host: True,
+        nginx_network_name: "nginx_net",
+        nginx_network_driver: "overlay",
+        #docker_network_encrypted: 'true',
+        nginx_run_as: "stack",
+        force_images: "True"
+      }
+    - { 
+        role: corteza,
+        letsencrypt_email: "{{ lets_encrypt_mail }}",
+        nginx_network_name: "nginx_net",
+        nginx_run_as: "stack",
+        force_images: "false",
+        nginx_domain: "{{ domain }}" #  without subdomain
+      }
+  vars:
+    images:
+      - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.3.1", basenamespace: "", basename: "alpine", basetag: "3.13" }
+      - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.3.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.3.1" }
+      - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.3.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.3.1-alpine-fat" }

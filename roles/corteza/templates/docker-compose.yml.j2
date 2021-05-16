@@ -1,0 +1,95 @@
+#https://docs.cortezaproject.org/corteza-docs/2021.3/devops-guide/index.html#_configure_docker_compose_yaml
+version: "3.7"
+networks:
+ {{ nginx_network_name }}:
+    driver: overlay
+    external: true
+{% if create_stack_network is defined and create_stack_network|bool==true %}      
+ {{ stack_network_name }}:
+    driver: overlay
+    external: true
+{% endif %}    
+
+services:
+  server:
+    image: "{{ corteza_mysql_image }}"
+    volumes:
+    - {{ deploy_name }}_mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "{{ corteza_mysql_root_password }}"
+      MYSQL_DATABASE: {{ deploy_name }}
+      MYSQL_USER: {{ deploy_name }}
+      MYSQL_PASSWORD: "{{ corteza_mysql_password }}"
+    networks:      
+{% if create_stack_network is defined and create_stack_network|bool==true %}      
+      - {{ stack_network_name }}
+{% else %}
+      - {{ nginx_network_name }}
+{% endif %}      
+    deploy:
+      restart_policy:
+        condition: on-failure
+    healthcheck: { test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"], timeout: 20s, retries: 10 }
+
+#https://github.com/cortezaproject/corteza-docs/issues/178
+  corteza:
+    image: {{ corteza_image }}
+    ports:
+    - "80"
+    environment:
+      CORTEZA_DB_NAME: "{{ deploy_name }}"
+      CORTEZA_DB_HOST: "server"
+      CORTEZA_DB_USER: "{{ deploy_name }}"
+      CORTEZA_DB_PASSWORD: "{{ corteza_mysql_password }}"
+      TEMPLATE_RENDERER_GOTENBERG_ADDRESS: "http://pdf:3000"
+      TEMPLATE_RENDERER_GOTENBERG_ENABLED: "true"
+      DOMAIN: "{{ external_domain }}"
+      VERSION: "{{ image_version }}"
+      DB_DSN: "{{ deploy_name }}:{{ corteza_mysql_password }}@tcp(server:3306)/{{ deploy_name }}?collation=utf8mb4_general_ci"
+      # Running all-in-one and serving web applications directly from server container
+      HTTP_WEBAPP_ENABLED: "true"
+      # Send action log to container logs as well
+      #ACTIONLOG_ENABLED: "true"
+      ACTIONLOG_DEBUG: "true"
+      # Uncomment for extra debug info if something goes wrong
+      # LOG_LEVEL: "debug"
+      # Use nicer and colorful log instead of JSON
+      # LOG_DEBUG: "true"
+      # SMTP (mail sending) settings
+      # Point this to your local or external SMTP server if you want to send emails.
+      # In most cases, Corteza can detect that SMTP is disabled and skips over sending emails without an error
+      SMTP_HOST: "{{ keycloak_smtp_host }}:{{ keycloak_smtp_port }}"
+      SMTP_USER: "{{ keycloak_smtp_user }}"
+      SMTP_PASS: "{{ keycloak_smtp_password }}"
+      SMTP_FROM: '"Corteza|Toni-Media" <{{ keycloak_smtp_from }}>'      
+    networks:
+{% if create_stack_network is defined and create_stack_network|bool==true %}      
+      - {{ stack_network_name }}
+{% else %}
+      - {{ nginx_network_name }}
+{% endif %}      
+    volumes:
+    - {{ deploy_name }}_data:/data
+    deploy:
+      restart_policy:
+        condition: on-failure      
+
+#https://github.com/thecodingmachine/gotenberg        
+  pdf:
+    image: {{ pdf_image }}
+    ports:
+    - "3000"
+    networks:
+{% if create_stack_network is defined and create_stack_network|bool==true %}      
+      - {{ stack_network_name }}
+{% else %}
+      - {{ nginx_network_name }}
+{% endif %}      
+    deploy:
+      restart_policy:
+        condition: on-failure          
+
+
+volumes:
+  {{ deploy_name }}_mysql_data:
+  {{ deploy_name }}_data:

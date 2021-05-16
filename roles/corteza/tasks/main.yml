@@ -1,0 +1,118 @@
+---
+- name: Register nginx.conf file
+  stat:
+    path: "{{ nginx_conf_dir }}/nginx.conf"
+  register: nginx_conf_file  
+
+- file:
+    state: directory
+    path: "{{ item }}"
+    recurse: yes
+  loop:
+    "{{ dir_exists }}"
+
+# - name: Deploy .env
+#   template:
+#     src: ".env.j2"
+#     dest: "{{ user_path }}/{{ deploy_name }}/.env"
+#   when: nginx_conf_file.stat.exists
+
+- name: Create network
+  include_role:
+    name: toni.docker
+    tasks_from: create_network
+  vars:
+    ipam_driver_options:
+      encrypted: "false"
+    docker_networks:
+      - { name: "{{ stack_network_name }}", subnet: "{{ stack_subnet }}", driver: "overlay", internal: 'no', gateway: "" }
+  when: create_stack_network|default(false)
+
+- name: Deploy vhost
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_dir }}/conf.d/{{ external_domain }}.conf"
+  when: nginx_conf_file.stat.exists
+  
+- name: Copy snippets
+  include_role:
+    name: toni.openresty
+    tasks_from: snippets
+  vars:  
+    keycloak_access_group: "{{ access_group }}"
+    nginx_snippets:
+      - { srcname: "auth.conf.j2", destname: "{{ access_group }}_auth.conf" }
+
+- name: Configure nginx logs
+  when: nginx_conf_file.stat.exists
+  include_role:
+    name: toni.openresty
+    tasks_from: logs
+
+- name: stop nginx stack
+  docker_stack:
+    state: absent
+    name: nginx
+    compose:
+      - "{{ user_path }}/openresty/docker-compose.yml"
+
+- name: restart nginx stack
+  docker_stack:
+    state: present
+    prune: yes
+    name: nginx
+    compose:
+      - "{{ user_path }}/openresty/docker-compose.yml"
+
+- name: set cert facts 
+  when: not existing_certs|bool
+  include_role:
+    name: toni.certificates
+    tasks_from: certbot_facts
+  vars:
+    certbot_server: "{{ nginx_subdomain }}{{ nginx_domain }}"
+
+# .conf!!!
+- name: Deploy vhost
+  when: not existing_certs|bool and certbot_cert_exists|bool
+  template:
+    src: nginx.conf.j2
+    dest: "{{ nginx_conf_dir }}/conf.d/{{ external_domain }}.conf"
+  
+- name: stop nginx stack
+  docker_stack:
+    state: absent
+    name: nginx
+    compose:
+      - "{{ user_path }}/openresty/docker-compose.yml"
+
+- name: restart nginx stack
+  docker_stack:
+    state: present
+    prune: yes
+    name: nginx
+    compose:
+      - "{{ user_path }}/openresty/docker-compose.yml"
+
+- name: Deploy compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
+
+- name: restart {{ deploy_name }} stack
+  docker_stack:
+    state: absent
+    prune: yes
+    name: "{{ deploy_name }}"
+    compose:
+      - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
+
+- name: restart {{ deploy_name }} stack
+  docker_stack:
+    state: present
+    prune: yes
+    name: "{{ deploy_name }}"
+    compose:
+      - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"      
+
+
