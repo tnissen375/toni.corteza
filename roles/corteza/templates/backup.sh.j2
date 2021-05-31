@@ -1,0 +1,12 @@
+#!/bin/bash
+d=$(date +%Y_%m_%d)
+
+#do local db backup
+docker exec $(docker ps -a | awk '{print $NF}' | grep -w "{{ deploy_name }}_{{ corteza_mysql_db }}_db\.*") sh -c 'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" {{ corteza_mysql_db }}' | gzip > {{ user_path }}/backup/{{ deploy_name }}/{{ corteza_mysql_db }}_db_"$d".sql.gz
+
+#do local data backup
+docker exec $(docker ps -a | awk '{print $NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*") sh -c 'exec tar -cv /data/' | gzip > {{ user_path }}/backup/{{ deploy_name }}/data_"$d".tar.gz
+
+#keep files for 10 days
+find {{ user_path }}/backup/{{ deploy_name }}/*.sql.gz  -mtime +10 -delete &> /dev/null
+find {{ user_path }}/backup/{{ deploy_name }}/data_*.gz  -mtime +10 -delete &> /dev/null

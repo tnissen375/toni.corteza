@@ -1,7 +1,7 @@
 ---
 #Auf allen hosts ist Python 3 installiert // Get rid of deprecation warning
-domain: ""
-lets_encrypt_mail: ""
+domain: "toni-media.com"
+lets_encrypt_mail: "jidumailer@gmail.com"
 
 ansible_python_interpreter: /usr/bin/python3
 

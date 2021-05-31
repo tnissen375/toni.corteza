@@ -1,0 +1,57 @@
+TAIL=20
+d=$$(date +%Y_%m_%d)
+
+DB := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}_db\.*")
+CORTEZA := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*")
+NGINX := $$(docker ps -a | awk '{print $$NF}' | grep -w "nginx_nginx-proxy\.*")
+
+rm:
+	docker stack rm {{ deploy_name }}
+
+deploy:
+	docker stack deploy -c docker-compose.yml {{ deploy_name }} && docker exec -it $(NGINX) nginx -s reload
+
+ps:
+	docker stack ps {{ deploy_name }} --no-trunc
+
+log:
+	docker service logs -f $(CORTEZA) --tail ${TAIL}
+
+dblog:
+	docker service logs -f $(DB) --tail ${TAIL}
+
+exec:
+	docker exec -it $(CORTEZA) sh
+
+execdb:
+	docker exec -it $(DB) /bin/bash
+
+bckup:
+	docker exec $(CORTEZA) sh -c 'exec tar -cv /data' | gzip > {{ user_path }}/{{ deploy_name }}/backup/data_"$d".tar.gz
+
+restore:
+	gunzip -c $(file) | docker cp - $(CORTEZA):/
+
+bckupdb:
+	docker exec $(DB) sh -c 'exec mysqldump -uroot -p"$$MYSQL_ROOT_PASSWORD" {{ corteza_mysql_db }}' | gzip > {{ user_path }}/{{ deploy_name }}/backup/{{ corteza_mysql_db }}_db_"$d".sql.gz
+
+restoredb:
+	gunzip -c $(file) | docker exec -i $(DB) sh -c 'exec mysql -u root -p"$$MYSQL_ROOT_PASSWORD" {{ corteza_mysql_db }}'
+
+purge:
+	find {{ user_path }}/{{ deploy_name }}/backup/*.sql.gz  -mtime +10 -delete &> /dev/null && find {{ user_path }}/{{ deploy_name }}/data_*.gz  -mtime +10 -delete &> /dev/null
+
+{% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
+
+exec:
+	docker exec -it $(CORTEZA) /bin/bash
+
+apps:
+	docker exec $(CORTEZA) sh -c 'exec make --directory=/go/src/corteza-server/webapp'
+
+vendor:
+	docker exec $(CORTEZA) sh -c 'exec go mod vendor'
+
+realize:
+	docker exec $(CORTEZA) sh -c 'exec make realize'
+{% endif %}

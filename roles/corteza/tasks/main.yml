@@ -11,11 +11,31 @@
   loop:
     "{{ dir_exists }}"
 
-# - name: Deploy .env
+- name: Deploy .env
+  template:
+    src: ".env.j2"
+    dest: "{{ user_path }}/{{ deploy_name }}/.env"
+  tags: [ never, dev]
+  when: nginx_conf_file.stat.exists
+
+# - name: Deploy backup script
 #   template:
-#     src: ".env.j2"
-#     dest: "{{ user_path }}/{{ deploy_name }}/.env"
-#   when: nginx_conf_file.stat.exists
+#     src: "backup.sh.j2"
+#     dest: "{{ user_path }}/{{ deploy_name }}/backup/backup.sh"
+#     mode: u+x
+
+- name: Deploy Make
+  template:
+    src: "Makefile.j2"
+    dest: "{{ user_path }}/{{ deploy_name }}/Makefile"
+
+- name: Git checkout corteza code
+  git:
+    repo: "{{ corteza_dev_repository }}"
+    dest: "{{ user_path }}/{{ deploy_name }}/src"
+    version: "{{ corteza_dev_version }}"
+    force: yes
+  tags: [ never, dev]
 
 - name: Create network
   include_role:
@@ -113,6 +133,6 @@
     prune: yes
     name: "{{ deploy_name }}"
     compose:
-      - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"      
-
-
+      - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
+      
+#make --directory=/go/src/corteza-server/webapp

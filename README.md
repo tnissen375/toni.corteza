@@ -1,5 +1,5 @@
 # toni.corteza
-Ansible role to setup corteza low code plattform.
+Ansible role to setup corteza low code plattform with or without a seperated developement version. (Port 8443).
 
 ### How to install
 
@@ -19,7 +19,7 @@ Make sure the ssh key from the installer machine is added to the authorized keys
 ### Domain / Subdomain
 
 You have to make sure that your domain is pointing to your server. For my tests i use  `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later.
-These settings have to be done before running these ansible role, cause SSL-Certificates for the subdomain will be  issued automaticly.
+These settings have to be done before running these ansible role, cause SSL-Certificates for the subdomain will be issued automaticly.
 
 ### Back on installer machine
 
@@ -105,8 +105,13 @@ nano inventories/hosts
 
 So, you are good to go now.
 
+Deploy production
 ```bash
 ansible-playbook ./install.yml -i inventories --vault-id corteza@vault
+```
+Deploy developement branch, substitue <subdomain_dev_branch> with subdomain name (make sure you set DNS records). 
+```bash
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "untagged,dev" --extra-vars "nginx_subdomain=<subdomain_dev_branch>. corteza_dev_enable=true deploy_name=cortezadev"
 ```
 
 Hopefully all went well and your corteza server is ready.
