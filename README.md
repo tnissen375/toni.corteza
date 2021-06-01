@@ -105,13 +105,19 @@ nano inventories/hosts
 
 So, you are good to go now.
 
-Deploy production
+Deploy complete production
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --skip-tags "dev"
 ```
+
+Redeploy only corteza (host already setup)
+```bash
+ansible-playbook install.yml -i inventories --vault-id corteza@vault --tags "corteza" --skip-tags "dev"
+```
+
 Deploy developement branch, substitue <subdomain_dev_branch> with subdomain name (make sure you set DNS records). 
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "untagged,dev" --extra-vars "nginx_subdomain=<subdomain_dev_branch>. corteza_dev_enable=true deploy_name=cortezadev"
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza" --extra-vars "nginx_subdomain=<subdomain_dev_branch>. corteza_dev_enable=true deploy_name=cortezadev"
 ```
 
 Hopefully all went well and your corteza server is ready.

@@ -17,7 +17,7 @@ ps:
 log:
 	docker service logs -f $(CORTEZA) --tail ${TAIL}
 
-dblog:
+logdb:
 	docker service logs -f $(DB) --tail ${TAIL}
 
 exec:
@@ -42,9 +42,6 @@ purge:
 	find {{ user_path }}/{{ deploy_name }}/backup/*.sql.gz  -mtime +10 -delete &> /dev/null && find {{ user_path }}/{{ deploy_name }}/data_*.gz  -mtime +10 -delete &> /dev/null
 
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
-
-exec:
-	docker exec -it $(CORTEZA) /bin/bash
 
 apps:
 	docker exec $(CORTEZA) sh -c 'exec make --directory=/go/src/corteza-server/webapp'

@@ -52,7 +52,8 @@
         nginx_network_name: "nginx_net",
         nginx_run_as: "stack",
         force_images: "false",
-        nginx_domain: "{{ domain }}" #  without subdomain
+        nginx_domain: "{{ domain }}", #  without subdomain
+        tags: [ corteza ]
       }
   vars:
     images:
