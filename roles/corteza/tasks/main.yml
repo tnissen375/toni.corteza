@@ -1,4 +1,12 @@
 ---
+- set_fact:
+    corteza_dev_enable: true
+  tags: [ never, dev]
+
+- set_fact:
+    corteza_app_enable: true
+  tags: [ never, app]  
+
 - name: Register nginx.conf file
   stat:
     path: "{{ nginx_conf_dir }}/nginx.conf"
@@ -37,6 +45,22 @@
     force: yes
   tags: [ never, dev]
 
+- name: Git checkout corteza app
+  git:
+    repo: "{{ corteza_app_repository }}"
+    dest: "{{ user_path }}/{{ deploy_name }}/src/"
+    version: "{{ corteza_app_version }}"
+    force: yes
+  tags: [ never, app]  
+
+# todo: Websockets need a closer look, maybe some changes in nginx conf are needed
+- name: Replace host cause it does not work with online dev server
+  when: corteza_app_enable is defined and corteza_app_enable|bool==true
+  replace:
+    path: "{{ user_path }}/{{ deploy_name }}/src/vue.config-builder.js"
+    regexp: '127.0.0.1'
+    replace: "0.0.0.0"
+
 - name: Create network
   include_role:
     name: toni.docker
@@ -69,6 +93,93 @@
     name: toni.openresty
     tasks_from: logs
 
+# - name: Register image file
+#   stat:
+#     path: "{{ user_path }}/{{ image_file_sshd }}"
+#   register: image_file
+#   tags: [ never, dev]
+
+# - name: remove images
+#   when: force_images|default(false)
+#   docker_image:
+#     name: "{{ image_sshd }}"
+#     force_absent: yes
+#     state: absent    
+#   tags: [ never, dev]
+
+# - name: copy tarball to host
+#   when: not image_file.stat.exists or force_images|default(false)
+#   copy:
+#     src: "/{{ user }}/{{ image_file_sshd }}"
+#     dest: "{{ user_path }}/{{ image_file_sshd }}"
+#   tags: [ never, dev]
+
+# - name: load container from tarball
+#   docker_image:
+#     name: "{{ image_sshd }}"
+#     load_path: "{{ user_path }}/{{ image_file_sshd }}"
+#     state: present
+#     source: load
+#   tags: [ never, dev]
+
+- name: Register image file
+  stat:
+    path: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
+  register: image_file
+  tags: [ never, dev]
+
+- name: remove images
+  when: force_images|default(false)
+  docker_image:
+    name: "{{ image_go_dev_ssh }}"
+    force_absent: yes
+    state: absent    
+  tags: [ never, dev]
+
+- name: copy tarball to host
+  when: not image_file.stat.exists or force_images|default(false)
+  copy:
+    src: "/{{ user }}/{{ image_file_go_dev_ssh }}"
+    dest: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
+  tags: [ never, dev]
+
+- name: load container from tarball
+  docker_image:
+    name: "{{ image_go_dev_ssh }}"
+    load_path: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
+    state: present
+    source: load
+  tags: [ never, dev]
+
+- name: Register image file
+  stat:
+    path: "{{ user_path }}/{{ image_file_node_ssh }}"
+  register: image_file
+  tags: [ never, app]
+
+- name: remove images
+  when: force_images|default(false)
+  docker_image:
+    name: "{{ image_node_ssh }}"
+    force_absent: yes
+    state: absent    
+  tags: [ never, app]
+
+- name: copy tarball to host
+  when: not image_file.stat.exists or force_images|default(false)
+  copy:
+    src: "/{{ user }}/{{ image_file_node_ssh }}"
+    dest: "{{ user_path }}/{{ image_file_node_ssh }}"
+  tags: [ never, app]
+
+- name: load container from tarball
+  docker_image:
+    name: "{{ image_node_ssh }}"
+    load_path: "{{ user_path }}/{{ image_file_node_ssh }}"
+    state: present
+    source: load
+  tags: [ never, app]
+
 - name: stop nginx stack
   docker_stack:
     state: absent
@@ -91,6 +202,8 @@
     tasks_from: certbot_facts
   vars:
     certbot_server: "{{ nginx_subdomain }}{{ nginx_domain }}"
+    record_dns_create: "{{ dns_create }}"
+    record_dns_update: "{{ dns_update }}"
 
 # .conf!!!
 - name: Deploy vhost
@@ -115,9 +228,28 @@
       - "{{ user_path }}/openresty/docker-compose.yml"
 
 - name: Deploy compose file
+  when: corteza_app_enable is defined and corteza_app_enable|bool==false
   template:
     src: docker-compose.yml.j2
     dest: "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
+
+- name: Deploy compose app file
+  when: corteza_app_enable is defined and corteza_app_enable|bool==true
+  template:
+    src: docker-compose-app.yml.j2
+    dest: "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
+
+- name: Deploy config app file
+  when: corteza_app_enable is defined and corteza_app_enable|bool==true
+  template:
+    src: config.js.j2
+    dest: "{{ user_path }}/{{ deploy_name }}/src/public/config.js"
+
+- name: Deploy config app file
+  when: corteza_app_enable is defined and corteza_app_enable|bool==true
+  template:
+    src: healthcheck.js.j2
+    dest: "{{ user_path }}/{{ deploy_name }}/src/healthcheck.js"
 
 - name: restart {{ deploy_name }} stack
   docker_stack:
@@ -134,5 +266,7 @@
     name: "{{ deploy_name }}"
     compose:
       - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
-      
+
+
+
 #make --directory=/go/src/corteza-server/webapp

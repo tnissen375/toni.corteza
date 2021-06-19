@@ -19,7 +19,7 @@ ntp_manage_config: true
 ntp_timezone: Europe/Berlin
 
 #enable_clear_dockerlogs: True
-
+keycloak_smtp_display_name: "Corteza|Toni-Media.com"
 keycloak_smtp_host: "smtp.gmail.com"
 keycloak_smtp_port: "587"
 keycloak_smtp_user: "{{ lets_encrypt_mail }}"

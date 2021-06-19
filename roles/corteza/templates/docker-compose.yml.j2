@@ -46,7 +46,7 @@ services:
       TEMPLATE_RENDERER_GOTENBERG_ADDRESS: "http://pdf:3000"
       TEMPLATE_RENDERER_GOTENBERG_ENABLED: "true"
       DOMAIN: "{{ external_domain }}"
-      VERSION: "{{ image_version }}"
+      VERSION: "{{ corteza_image_version }}"
       DB_DSN: "{{ deploy_name }}:{{ corteza_mysql_password }}@tcp({{ deploy_name }}_db:3306)/{{ deploy_name }}?collation=utf8mb4_general_ci"
       # Running all-in-one and serving web applications directly from server container
       HTTP_WEBAPP_ENABLED: "true"
@@ -63,7 +63,7 @@ services:
       SMTP_HOST: "{{ keycloak_smtp_host }}:{{ keycloak_smtp_port }}"
       SMTP_USER: "{{ keycloak_smtp_user }}"
       SMTP_PASS: "{{ keycloak_smtp_password }}"
-      SMTP_FROM: '"Corteza|Toni-Media" <{{ keycloak_smtp_from }}>'      
+      SMTP_FROM: '"{{ keycloak_smtp_display_name }}" <{{ keycloak_smtp_from }}>'      
     networks:
 {% if create_stack_network is defined and create_stack_network|bool==true %}      
       - {{ stack_network_name }}
@@ -75,6 +75,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure      
+    healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #only container/webserver not if checks passed
 
 #https://github.com/thecodingmachine/gotenberg        
   pdf:
@@ -89,28 +90,51 @@ services:
 {% endif %}      
     deploy:
       restart_policy:
-        condition: on-failure          
+        condition: on-failure      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/ping"]
+      interval: 1m30s
+      timeout: 10s
+      retries: 3
+    environment:
+      LOG_LEVEL: INFO
+      DISABLE_UNOCONV: 1 #Universal Office Converter
 
 {% else %}
   {{ deploy_name }}:
-    image: deis/go-dev:{{ go_dev_image_tag }}
+    image: {{ image_go_dev_ssh }}
     ports:
     - "80"
+    - "{{ host_ssh_port }}:22" # Attention: port {{ host_ssh_port }} is opened on host and bypasses UFW!!! This is ok here, cause you need a valid sshkey but this behavior may be not suspected from docker ;)
     networks:
+{% if create_stack_network is defined and create_stack_network|bool==true %}      
+      - {{ stack_network_name }}
+{% else %}
       - {{ nginx_network_name }}
+{% endif %}  
     volumes:
     - {{ deploy_name }}_data:/data
     - {{ user_path }}/{{ deploy_name }}/src:/go/src/corteza-server
     - {{ user_path }}/{{ deploy_name }}/.env:/go/src/corteza-server/.env
+    - "~/.ssh:/root/.ssh"
+    - /var/run/docker.sock:/var/run/docker.sock
+    - {{ deploy_name }}_vscode_go_tools:{{ user_path }}/go
+    - {{ deploy_name }}_vscode:{{ user_path }}/.vscode-server
     working_dir: /go/src/corteza-server
     tty: true
-#    command:
-#      bash -c "go mod vendor && make realize"
+    command:
+      bash -c "service ssh start && go mod vendor && make realize"
     deploy:
       restart_policy:
         condition: on-failure
+    #healthcheck: { test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #go webserver answers 405?!?
+    healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #only container/webserver not if checks passed
 {% endif %}
 
 volumes:
   {{ deploy_name }}_mysql_data:
   {{ deploy_name }}_data:
+{% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
+  {{ deploy_name }}_vscode:
+  {{ deploy_name }}_vscode_go_tools:
+{% endif %}

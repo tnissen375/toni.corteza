@@ -1,8 +1,10 @@
 ---
 user: "root"
 user_path: "/root"
-deploy_name: "{{ role_name }}"
-nginx_subdomain: "corteza."
+deploy_name: "corteza"
+nginx_subdomain: "{{ deploy_name }}."
+dns_create: false
+dns_update: false
 nginx_network_name: "nginx_net"
 create_stack_network: false
 #stack_network_name: "corteza_net" -> add to openresty stack
@@ -15,8 +17,8 @@ external_domain: "{{ nginx_subdomain }}{{ nginx_domain }}"
 include_auth: "false"
 access_group: "web"
 corteza_mysql_image: "percona:8.0"
-image_version: "2021.3.5"
-corteza_image: "cortezaproject/corteza-server:{{ image_version }}"
+corteza_image_version: "2021.3.5"
+corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"
 pdf_image_version: "6"
 pdf_image: "thecodingmachine/gotenberg:{{ pdf_image_version }}"
 corteza_mysql_user: "corteza"
@@ -24,10 +26,23 @@ corteza_mysql_db: "corteza"
 corteza_mysql_root_password: "pDsQ2Ahh4W2ojDb4vGeh05n" #dummy, replace in group_vars/all.yml
 corteza_mysql_password: "pDsQsg62AW2ojDb4vGeh05nxy" #dummy, replace in group_vars/all.yml
 corteza_dev_enable: "false"
+corteza_dev_base_url: "dev.toni-media.com"
 corteza_dev_repository: "https://github.com/tnissen375/corteza-server.git"
-corteza_dev_version: "2021.3.4"
-go_dev_image: "deis/go-dev"
-go_dev_image_tag: "v1.32.1"
+corteza_dev_version: "2021.3.x"
+corteza_app_enable: "false"
+corteza_app_repository: "https://github.com/tnissen375/corteza-webapp-compose.git"
+corteza_app_version: "2021.3.x"
+#go_dev_image: "deis/go-dev"
+#go_dev_image_tag: "v1.32.2"
+#image_sshd: "registry.{{ domain }}/sshd:3.13"
+#image_file_sshd: "registry.{{ domain }}_sshd:3.13.tar"
+host_ssh_port: 2223
+image_go_dev_tag: "v1.32.2"
+image_go_dev_ssh: "registry.{{ domain }}/go-dev-ssh:{{ image_go_dev_tag }}"
+image_file_go_dev_ssh: "registry.{{ domain }}_go-dev-ssh:{{ image_go_dev_tag }}.tar"
+image_node_ssh_tag: "14"
+image_node_ssh: "registry.{{ domain }}/node-ssh:{{ image_node_ssh_tag }}"
+image_file_node_ssh: "registry.{{ domain }}_node-ssh:{{ image_node_ssh_tag }}.tar"
 
 nginx_conf_dir: "/etc/nginx"
 container_cert_path: "/etc/ssl/dummy-ssl-fallback.crt"
@@ -36,5 +51,5 @@ container_key_path: "/etc/ssl/dummy-ssl-fallback.key"
 dir_exists:
   - "/etc/nginx/conf.d"
   - "{{ user_path }}/{{ deploy_name }}"
-  - "{{ user_path }}//{{ deploy_name }}/backup"
+  - "{{ user_path }}/{{ deploy_name }}/backup"
   - "{{ user_path }}/{{ deploy_name }}/src"

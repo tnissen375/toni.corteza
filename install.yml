@@ -42,7 +42,7 @@
         nginx_network_driver: "overlay",
         #docker_network_encrypted: 'true',
         nginx_run_as: "stack",
-        force_images: "True",
+        force_images: true,
         tags: [ host ]
       }
     - { 
@@ -51,7 +51,7 @@
         corteza_dev_enable: false,
         nginx_network_name: "nginx_net",
         nginx_run_as: "stack",
-        force_images: "false",
+        force_images: false,
         nginx_domain: "{{ domain }}", #  without subdomain
         tags: [ corteza ]
       }
@@ -60,3 +60,6 @@
       - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.3.1", basenamespace: "", basename: "alpine", basetag: "3.13" }
       - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.3.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.3.1" }
       - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.3.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.3.1-alpine-fat" }
+      - { namespace: "registry.{{ domain }}", name: "sshd", tag: "3.13", basenamespace: "", basename: "alpine", basetag: "3.13" }
+      - { namespace: "registry.{{ domain }}", name: "go-dev-ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
+      - { namespace: "registry.{{ domain }}", name: "node-ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" }      
