@@ -1,3 +1,6 @@
+- import_playbook: builder.yml
+  tags: [ build ]
+
 - hosts: swarm-01
   remote_user: root
   gather_facts: yes
@@ -20,7 +23,6 @@
         ]
       }      
 
-
 - hosts: swarm-01
   remote_user: root
   gather_facts: yes
@@ -31,10 +33,6 @@
         swarm_interface: "{{ ansible_default_ipv4['interface'] }}", #default wg0
         tags: [ host ]
       }
-    - {
-        role : toni.buildimages,
-        tags: [ host, build ]
-      }      
     - {
         role: toni.openresty,
         #docker_network_host: True,
@@ -55,11 +53,3 @@
         nginx_domain: "{{ domain }}", #  without subdomain
         tags: [ corteza ]
       }
-  vars:
-    images:
-      - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.3.1", basenamespace: "", basename: "alpine", basetag: "3.13" }
-      - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.3.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.3.1" }
-      - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.3.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.3.1-alpine-fat" }
-      - { namespace: "registry.{{ domain }}", name: "sshd", tag: "3.13", basenamespace: "", basename: "alpine", basetag: "3.13" }
-      - { namespace: "registry.{{ domain }}", name: "go_dev_ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
-      - { namespace: "registry.{{ domain }}", name: "node_ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" }      
