@@ -6,8 +6,8 @@ So some variable may be unexpected but thats ok (at least for me) and maybe will
 
 ### Domain / Subdomain
 
-You have to make sure that your domain is pointing to your server. For my tests i use  `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later. If you are using a Server @ Hetzner **or** Amazon Route 53 DNS** (**to be implemented) you dont have to worry about the setup. This role will take care of it.
-For any other dns provider you will have to either adjust the the toni.dns role or y ll need to do the DNS settings manual before running these ansible role, cause SSL-Certificates for the subdomain(s) will be issued automaticly anyway and therefore all DNS entries of all used subdomains are required.
+You have to make sure that your domain is pointing to your server. For my tests i use  `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later. If you are using a Server @ Hetzner **or** Amazon Route 53 DNS** (**to be implemented) you dont have to worry about the setup. This role will take care of creating DNS entries.
+For any other dns provider you will have to either adjust the the toni.dns role or y ll need to do the DNS settings manual before running these ansible role, cause SSL-Certificates for the domain and subdomain(s) will be issued automaticly anyway and therefore **all DNS entries of all used subdomains are required.** Set up DNS entries manualy at your dns server / provider if you are not using a server at hetzner **before you run the role.**
 
 ## Settings
 
@@ -69,17 +69,17 @@ Normally install the ansible requirements and you are good to go.
 
 If you have any doubts check the requirements-section at the end.
 
+### Basic setup (run once)
+```bash
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "build, host"
+```
+
 ### Production
 Deploy complete production
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --skip-tags "dev,app"
-```
-
-Redeploy only corteza (host already setup)
-
-```bash
 ansible-playbook install.yml -i inventories --vault-id corteza@vault --tags "corteza" --skip-tags "dev,app"
 ```
+
 ### Development corteza core
 Deploy developement branch, deploy_name corresponds to the subdomain where the app is deployed (make sure you set DNS records at your DNS-server). Specify extra-vars for repository if needed.
 
@@ -94,12 +94,67 @@ Example corteza compose app, chosse different `host_ssh_port` for each app.
 ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza" --skip-tags "dev" --extra-vars "deploy_name=dev corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224"
 ```
 
+You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
 Hopefully all went well and your corteza server and subdomains are ready.
 - Production: `corteza.<your domain>.com`, p.e. `corteza.toni-media.com`.
 - Development corteza core: `dev.<your domain>.com`, p.e. `dev.toni-media.com`.
 - Development corteza app: `compose.<your domain>.com`, p.e. `compose.toni-media.com`. 
 
 Feel free to contact me if any problems arise. ;)
+
+## Commands for easy access
+
+Enter the desired stack installtion dir in user path. (p.e. `/root/dev`) and execute commands to your swarm node stack.
+
+#### Backup
+
+The backup is stored in `{{ user path }}/backup`, p.e. `root/dev/backup`
+
+```bash
+# Take a backup of data dir
+make bckup
+
+# Take a backup of the database
+make bckupdb
+```
+
+#### Restore
+```bash
+# Restore data dir
+make restore file=backup/data_2021_06_01.tar.gz
+# Restore database
+make restoredb file=backup/dev_db_2021_06_01.sql.gz
+```
+
+#### Start stack
+
+```bash
+make deploy
+```
+
+#### Stop stack
+
+```bash
+make rm
+```
+
+#### show logs
+
+```bash
+#show log app container
+make log
+#show log db container
+make logdb
+```
+
+#### exec container
+
+```bash
+#enter app container
+make exec
+#enter db container
+make execdb
+```
 
 ## Requirements - prepare before installation 
 
@@ -212,14 +267,13 @@ All containers are connected to the same network. The developement containers ar
 
 *todo*: add guide ;)
 
-
 ### Apps / Node
 [VS Code attaching to node](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_attaching-to-nodejs)
 
 *todo*: add guide ;)
 
 ## Whats up next?
-- summer holiday :)
+- Summer holiday :)
 - Extend documentation
 - Guide on go debugging
 - Guide on node debugging
@@ -228,5 +282,6 @@ All containers are connected to the same network. The developement containers ar
 - Automate sink route
 - Add Route53 DNS
 - Add deployment for AWS
+- Automatic tests
 
 Any other ideas? Drop me a line.

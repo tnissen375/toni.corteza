@@ -50,6 +50,7 @@
         nginx_network_name: "nginx_net",
         nginx_run_as: "stack",
         force_images: false,
+        nginx_swarm_real_ip: true,
         nginx_domain: "{{ domain }}", #  without subdomain
         tags: [ corteza ]
       }
