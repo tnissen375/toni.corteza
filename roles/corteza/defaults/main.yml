@@ -7,7 +7,7 @@ dns_create: false
 dns_update: false
 nginx_network_name: "nginx_net"
 create_stack_network: false
-#stack_network_name: "corteza_net" -> add to openresty stack
+stack_network_name: "corteza_net"
 stack_subnet: "10.10.15.0/24"
 nginx_upstream: "http://{{ deploy_name }}:80"
 external_domain: "{{ nginx_subdomain }}{{ nginx_domain }}"

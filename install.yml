@@ -40,6 +40,7 @@
         nginx_network_driver: "overlay",
         #docker_network_encrypted: 'true',
         nginx_run_as: "stack",
+        nginx_swarm_real_ip: true,
         force_images: true,
         tags: [ host ]
       }
@@ -49,8 +50,8 @@
         corteza_dev_enable: false,
         nginx_network_name: "nginx_net",
         nginx_run_as: "stack",
+        create_stack_network: true,
         force_images: false,
-        nginx_swarm_real_ip: true,
         nginx_domain: "{{ domain }}", #  without subdomain
         tags: [ corteza ]
       }

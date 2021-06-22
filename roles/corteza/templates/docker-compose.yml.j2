@@ -65,10 +65,9 @@ services:
       SMTP_PASS: "{{ keycloak_smtp_password }}"
       SMTP_FROM: '"{{ keycloak_smtp_display_name }}" <{{ keycloak_smtp_from }}>'      
     networks:
+      - {{ nginx_network_name }}
 {% if create_stack_network is defined and create_stack_network|bool==true %}      
       - {{ stack_network_name }}
-{% else %}
-      - {{ nginx_network_name }}
 {% endif %}      
     volumes:
     - {{ deploy_name }}_data:/data
@@ -107,11 +106,10 @@ services:
     - "80"
     - "{{ host_ssh_port }}:22" # Attention: port {{ host_ssh_port }} is opened on host and bypasses UFW!!! This is ok here, cause you need a valid sshkey but this behavior may be not suspected from docker ;)
     networks:
+      - {{ nginx_network_name }}
 {% if create_stack_network is defined and create_stack_network|bool==true %}      
       - {{ stack_network_name }}
-{% else %}
-      - {{ nginx_network_name }}
-{% endif %}  
+{% endif %}      
     volumes:
     - {{ deploy_name }}_data:/data
     - {{ user_path }}/{{ deploy_name }}/src:/go/src/corteza-server
@@ -128,7 +126,7 @@ services:
       restart_policy:
         condition: on-failure
     #healthcheck: { test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #go webserver answers 405?!?
-    healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #only container/webserver not if checks passed
+    healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 5 } #only container/webserver not if all makchecks passed
 {% endif %}
 
 volumes:
