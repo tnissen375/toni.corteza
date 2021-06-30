@@ -50,7 +50,8 @@ server {
   include snippets/{{ access_group }}_auth.conf;
 {% endif %}
   set $upstream {{ nginx_upstream }};
-  proxy_pass          $upstream;    
+  proxy_pass_header Content-Type;
+  proxy_pass          $upstream;
  }
 
 }

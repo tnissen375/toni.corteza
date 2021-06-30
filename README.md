@@ -265,7 +265,24 @@ All containers are connected to the same network. The developement containers ar
 ### Core / Go
 [VS Code debugging go](https://github.com/golang/vscode-go/blob/master/docs/debugging.md)
 
-*todo*: add guide ;)
+If you havent switched the ssh port of the dev container you can connect to the dev container on port 2223 of your docker host. After connecting with your standard host ssh key you should install the go extension from within vs code. This will be installed remotly to the container. 
+
+After doin so you can connect to your host and go to your dev folder:
+
+```bash
+cd ~/cortezadev
+make debug
+```
+
+Delve will be started in headless mode. If all went well you can start debugging in vs code, cause the vs code debug config has been deployed through the ansible role already. Debugging setup is not ideal by now, after changing go files in the container its necessary to restart the stack cause the new binary will be build automaticly and the pid is changing and delve is not connected anymore. This can be reolved if i figure out how i can get vs code to respect server/user paths. 
+Until than:
+
+```bash
+cd ~/cortezadev
+make rm
+make deploy
+make debug
+```
 
 ### Apps / Node
 [VS Code attaching to node](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_attaching-to-nodejs)
@@ -275,11 +292,11 @@ All containers are connected to the same network. The developement containers ar
 ## Whats up next?
 - Summer holiday :)
 - Extend documentation
-- Guide on go debugging
+- ~~Guide on go debugging~~
 - Guide on node debugging
 - Guide on app creation 
 - Add postfix container
-- Automate sink route
+- ~~Automate sink route~~
 - Add Route53 DNS
 - Add deployment for AWS
 - Automatic tests

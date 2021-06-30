@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Debug running server",
+            "apiVersion": 2,
+            "type": "go",
+            "request": "attach",
+            "mode": "remote",
+            "port": 42325,
+			"showLog": true,
+            "remotePath": "${workspaceFolder}",
+			"trace": "log",
+			"logOutput": "rpc"            
+        },
+        {
+            "name": "Debug go cli",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "args": ["sink", "signature", "--method", "POST", "--content-type", "email"],
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

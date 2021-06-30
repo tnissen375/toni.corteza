@@ -11,6 +11,18 @@ rm:
 deploy:
 	docker stack deploy -c docker-compose.yml {{ deploy_name }} && docker exec -it $(NGINX) nginx -s reload
 
+sinkhelp:
+	docker exec $(CORTEZA) corteza-server sink signature -h
+
+sink:
+	docker exec $(CORTEZA) corteza-server sink signature --method POST --content-type email
+
+sink{{ deploy_name }}:
+	docker exec $(CORTEZA) /go/src/corteza-server/gin-bin sink signature --method POST --content-type email
+
+debugdev:
+	docker exec -d $(CORTEZA) sh -c 'kill $$(pgrep dlv) || echo "dlv not running" && dlv attach -l 127.0.0.1:42325 --headless --log=true --accept-multiclient --api-version=2 $$(pgrep gin-bin)'
+
 ps:
 	docker stack ps {{ deploy_name }} --no-trunc
 

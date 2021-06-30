@@ -16,6 +16,7 @@ external_domain: "{{ nginx_subdomain }}{{ nginx_domain }}"
 #keycloak_secret: ""
 include_auth: "false"
 access_group: "web"
+corteza_sink_setup: true
 corteza_mysql_image: "percona:8.0"
 corteza_image_version: "2021.3.5"
 corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"

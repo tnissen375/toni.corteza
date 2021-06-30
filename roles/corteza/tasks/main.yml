@@ -26,6 +26,23 @@
   tags: [ never, dev]
   when: nginx_conf_file.stat.exists
 
+- name: Deploy vscode debug conf
+  template:
+    src: "launch.json.j2"
+    dest: "{{ user_path }}/{{ deploy_name }}/launch.json"
+  tags: [ never, dev]
+  when: nginx_conf_file.stat.exists
+
+#/proc/sys/kernel/yama/ptrace_scope
+- name: Ptrace for go debug
+  sysctl:
+    name: kernel.yama.ptrace_scope
+    value: 0
+    sysctl_set: yes
+    state: present
+    reload: yes
+  tags: [ never, dev]    
+
 # - name: Deploy backup script
 #   template:
 #     src: "backup.sh.j2"
@@ -267,6 +284,22 @@
     compose:
       - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
 
+- name: generate sink route
+  command: make sink{{ deploy_name }}
+  args:
+    chdir: "{{ user_path }}/{{ deploy_name }}"
+  register: result
+  when: corteza_sink_setup | bool == true
+ 
+- set_fact:
+    sink{{ deploy_name }}: "{{ item.split('=')[1] }}"
+  when: "item.split('=')[0] == '/system/sink?__sign' and result.rc == 0 and corteza_sink_setup|bool == true"
+  with_items: "{{ result.stderr_lines }}"
+
+- copy: content="{{ vars['sink' + deploy_name ] }}" dest={{ user_path }}/{{ deploy_name }}/sink
+
+# - debug:
+#     var: slurpfile
 
 
 #make --directory=/go/src/corteza-server/webapp

@@ -1,5 +1,5 @@
 #https://docs.cortezaproject.org/corteza-docs/2021.3/devops-guide/index.html#_configure_docker_compose_yaml
-version: "3.7"
+version: "3.9"
 networks:
  {{ nginx_network_name }}:
     driver: overlay
@@ -102,6 +102,8 @@ services:
 {% else %}
   {{ deploy_name }}:
     image: {{ image_go_dev_ssh }}
+    cap_add:
+    - SYS_PTRACE 
     ports:
     - "80"
     - "{{ host_ssh_port }}:22" # Attention: port {{ host_ssh_port }} is opened on host and bypasses UFW!!! This is ok here, cause you need a valid sshkey but this behavior may be not suspected from docker ;)
@@ -118,6 +120,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     - {{ deploy_name }}_vscode_go_tools:{{ user_path }}/go
     - {{ deploy_name }}_vscode:{{ user_path }}/.vscode-server
+    - {{ user_path }}/{{ deploy_name }}/launch.json/.vscode-server/.launch.json
     working_dir: /go/src/corteza-server
     tty: true
     command:
