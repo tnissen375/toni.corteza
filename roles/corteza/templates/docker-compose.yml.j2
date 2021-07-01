@@ -15,6 +15,7 @@ services:
     image: "{{ corteza_mysql_image }}"
     volumes:
     - {{ deploy_name }}_mysql_data:/var/lib/mysql
+    - /etc/localtime:/etc/localtime:ro
     environment:
       MYSQL_ROOT_PASSWORD: "{{ corteza_mysql_root_password }}"
       MYSQL_DATABASE: {{ corteza_mysql_db }}
@@ -71,6 +72,7 @@ services:
 {% endif %}      
     volumes:
     - {{ deploy_name }}_data:/data
+    - /etc/localtime:/etc/localtime:ro
     deploy:
       restart_policy:
         condition: on-failure      
@@ -86,7 +88,9 @@ services:
       - {{ stack_network_name }}
 {% else %}
       - {{ nginx_network_name }}
-{% endif %}      
+{% endif %}
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
     deploy:
       restart_policy:
         condition: on-failure      
@@ -121,6 +125,7 @@ services:
     - {{ deploy_name }}_vscode_go_tools:{{ user_path }}/go
     - {{ deploy_name }}_vscode:{{ user_path }}/.vscode-server
     - {{ user_path }}/{{ deploy_name }}/launch.json/.vscode-server/.launch.json
+    - /etc/localtime:/etc/localtime:ro
     working_dir: /go/src/corteza-server
     tty: true
     command:
@@ -129,7 +134,7 @@ services:
       restart_policy:
         condition: on-failure
     #healthcheck: { test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #go webserver answers 405?!?
-    healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 5 } #only container/webserver not if all makchecks passed
+    healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 30s, retries: 5 } #only container/webserver not if all makchecks passed
 {% endif %}
 
 volumes:

@@ -7,6 +7,10 @@
     corteza_app_enable: true
   tags: [ never, app]  
 
+- set_fact:
+    corteza_sink_setup: false
+  tags: [ never, app]
+
 - name: Register nginx.conf file
   stat:
     path: "{{ nginx_conf_dir }}/nginx.conf"
@@ -37,7 +41,7 @@
 - name: Ptrace for go debug
   sysctl:
     name: kernel.yama.ptrace_scope
-    value: 0
+    value: "0"
     sysctl_set: yes
     state: present
     reload: yes
@@ -200,17 +204,17 @@
 - name: stop nginx stack
   docker_stack:
     state: absent
-    name: nginx
+    name: "{{ nginx_stack }}"
     compose:
-      - "{{ user_path }}/openresty/docker-compose.yml"
+      - "{{ user_path }}/{{ nginx_stack }}/docker-compose.yml"
 
 - name: restart nginx stack
   docker_stack:
     state: present
     prune: yes
-    name: nginx
+    name: "{{ nginx_stack }}"
     compose:
-      - "{{ user_path }}/openresty/docker-compose.yml"
+      - "{{ user_path }}/{{ nginx_stack }}/docker-compose.yml"
 
 - name: set cert facts 
   when: not existing_certs|bool
@@ -232,17 +236,17 @@
 - name: stop nginx stack
   docker_stack:
     state: absent
-    name: nginx
+    name: "{{ nginx_stack }}"
     compose:
-      - "{{ user_path }}/openresty/docker-compose.yml"
+      - "{{ user_path }}/{{ nginx_stack }}/docker-compose.yml"
 
 - name: restart nginx stack
   docker_stack:
     state: present
     prune: yes
-    name: nginx
+    name: "{{ nginx_stack }}"
     compose:
-      - "{{ user_path }}/openresty/docker-compose.yml"
+      - "{{ user_path }}/{{ nginx_stack }}/docker-compose.yml"
 
 - name: Deploy compose file
   when: corteza_app_enable is defined and corteza_app_enable|bool==false
@@ -284,8 +288,14 @@
     compose:
       - "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
 
+- name: Sleep for 180 seconds and continue with play // dev init needs container restart
+  wait_for:
+    timeout: 180
+  tags: [ never, dev]
+  delegate_to: localhost
+
 - name: generate sink route
-  command: make sink{{ deploy_name }}
+  command: make sink #-B
   args:
     chdir: "{{ user_path }}/{{ deploy_name }}"
   register: result
@@ -293,13 +303,17 @@
  
 - set_fact:
     sink{{ deploy_name }}: "{{ item.split('=')[1] }}"
-  when: "item.split('=')[0] == '/system/sink?__sign' and result.rc == 0 and corteza_sink_setup|bool == true"
+  when: "corteza_sink_setup|bool == true and item.split('=')[0] == '/system/sink?__sign' and result.rc == 0"
+  ignore_errors: true
   with_items: "{{ result.stderr_lines }}"
 
 - copy: content="{{ vars['sink' + deploy_name ] }}" dest={{ user_path }}/{{ deploy_name }}/sink
+  when: corteza_sink_setup | bool == true
+  ignore_errors: true
+
+#make restoredb file=/backup/corteza_db_2021_06_01.sql.gz
 
 # - debug:
 #     var: slurpfile
-
 
 #make --directory=/go/src/corteza-server/webapp

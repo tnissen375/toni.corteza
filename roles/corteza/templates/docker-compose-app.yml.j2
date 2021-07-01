@@ -12,10 +12,13 @@ networks:
 services:
   {{ deploy_name }}:
     image: {{ image_node_ssh }}
+    cap_add:
+    - SYS_PTRACE     
     volumes:
       - nodemodules:/usr/src/service/node_modules
       - {{ user_path }}/{{ deploy_name }}/src/:/usr/src/service
       - "~/.ssh:/root/.ssh"
+      - /etc/localtime:/etc/localtime:ro
     environment:
       - NODE_ENV=development
     working_dir: /usr/src/service

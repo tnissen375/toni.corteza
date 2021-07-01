@@ -81,17 +81,17 @@ ansible-playbook install.yml -i inventories --vault-id corteza@vault --tags "cor
 ```
 
 ### Development corteza core
-Deploy developement branch, deploy_name corresponds to the subdomain where the app is deployed (make sure you set DNS records at your DNS-server). Specify extra-vars for repository if needed.
+Deploy developement branch, deploy_name corresponds to the subdomain where the app is deployed (make sure you set DNS records at your DNS-server). Specify extra-vars for repository if needed. Set extra var `corteza_webapp_enable=false` if you want to debug corteza apps.
 
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza" --skip-tags "app" --extra-vars "deploy_name=dev"
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, dev" --skip-tags "app" --extra-vars "deploy_name=dev corteza_webapp_enable=true"
 ```
 
 ### Development corteza apps
 
 Example corteza compose app, chosse different `host_ssh_port` for each app.
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza" --skip-tags "dev" --extra-vars "deploy_name=dev corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224"
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224"
 ```
 
 You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.

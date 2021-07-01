@@ -3,7 +3,12 @@ d=$$(date +%Y_%m_%d)
 
 DB := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}_db\.*")
 CORTEZA := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*")
-NGINX := $$(docker ps -a | awk '{print $$NF}' | grep -w "nginx_nginx-proxy\.*")
+NGINX := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ nginx_stack }}_nginx-proxy\.*")
+{% if corteza_dev_enable is defined and corteza_dev_enable|bool==false %}
+BIN := "corteza-server"
+{% else %}
+BIN := "/go/src/corteza-server/gin-bin"
+{% endif %}
 
 rm:
 	docker stack rm {{ deploy_name }}
@@ -12,16 +17,15 @@ deploy:
 	docker stack deploy -c docker-compose.yml {{ deploy_name }} && docker exec -it $(NGINX) nginx -s reload
 
 sinkhelp:
-	docker exec $(CORTEZA) corteza-server sink signature -h
+	docker exec $(CORTEZA) $(BIN) sink signature -h
 
 sink:
-	docker exec $(CORTEZA) corteza-server sink signature --method POST --content-type email
+	docker exec $(CORTEZA) $(BIN) sink signature --method POST --content-type email
 
-sink{{ deploy_name }}:
-	docker exec $(CORTEZA) /go/src/corteza-server/gin-bin sink signature --method POST --content-type email
-
+{% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
 debugdev:
 	docker exec -d $(CORTEZA) sh -c 'kill $$(pgrep dlv) || echo "dlv not running" && dlv attach -l 127.0.0.1:42325 --headless --log=true --accept-multiclient --api-version=2 $$(pgrep gin-bin)'
+{% endif %}
 
 ps:
 	docker stack ps {{ deploy_name }} --no-trunc
