@@ -84,14 +84,29 @@ ansible-playbook install.yml -i inventories --vault-id corteza@vault --tags "cor
 Deploy developement branch, deploy_name corresponds to the subdomain where the app is deployed (make sure you set DNS records at your DNS-server). Specify extra-vars for repository if needed. Set extra var `corteza_webapp_enable=false` if you want to debug corteza apps.
 
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, dev" --skip-tags "app" --extra-vars "deploy_name=dev corteza_webapp_enable=true"
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, dev" --skip-tags "app" --extra-vars "deploy_name=dev corteza_webapp_enable=true corteza_dev_enable=true"
 ```
 
-### Development corteza apps
+### Development corteza apps 
 
-Example corteza compose app, chosse different `host_ssh_port` for each app.
+You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
+Make sure you have created dns records for the subdomains.
+If you are using hetzner server this can be done automaticly, you have to specify your api tokens in inventory from toni.corteza or in toni.dns role:
+
+Example with token from toni.dns role:
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224"
+ansible-playbook ./install.yml -i inventories --vault-id dns@vault --vault-password-file ../toni.dns/vault --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=one
+corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-one.git corteza_app_version=2021.3.x host_ssh_port=2226 nginx_stack_keep_alive=true dns_create=true corteza_app_enable=true"
+```
+
+Example with already (manual) setup dns records (apps: compose, admin and one), chosse different `host_ssh_port` for each app.
+```bash
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224 nginx_stack_keep_alive=true corteza_app_enable=true"
+
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=admin corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-admin.git corteza_app_version=2021.3.x host_ssh_port=2225 nginx_stack_keep_alive=true corteza_app_enable=true"
+
+ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=workflow
+corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-workflow.git corteza_app_version=2021.3.x host_ssh_port=2227 nginx_stack_keep_alive=true corteza_app_enable=true"
 ```
 
 You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
@@ -286,6 +301,7 @@ make debug
 
 ### Apps / Node
 [VS Code attaching to node](https://code.visualstudio.com/docs/nodejs/nodejs-debugging#_attaching-to-nodejs)
+https://devtools.vuejs.org/guide/installation.html
 
 *todo*: add guide ;)
 

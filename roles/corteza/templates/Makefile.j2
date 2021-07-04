@@ -1,9 +1,9 @@
 TAIL=20
 d=$$(date +%Y_%m_%d)
 
-DB := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}_db\.*")
-CORTEZA := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*")
-NGINX := $$(docker ps -a | awk '{print $$NF}' | grep -w "{{ nginx_stack }}_nginx-proxy\.*")
+DB := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}_db\.*")
+CORTEZA := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*")
+NGINX := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ nginx_stack }}_nginx-proxy\.*")
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==false %}
 BIN := "corteza-server"
 {% else %}
@@ -31,13 +31,13 @@ ps:
 	docker stack ps {{ deploy_name }} --no-trunc
 
 log:
-	docker service logs -f $(CORTEZA) --tail ${TAIL}
+	docker service logs -f $(CORTEZA) --tail ${TAIL} --raw
 
 logdb:
 	docker service logs -f $(DB) --tail ${TAIL}
 
 exec:
-	docker exec -it $(CORTEZA) sh
+	docker exec -it $(CORTEZA) /bin/bash
 
 execdb:
 	docker exec -it $(DB) /bin/bash

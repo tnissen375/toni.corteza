@@ -124,7 +124,7 @@ services:
     - /var/run/docker.sock:/var/run/docker.sock
     - {{ deploy_name }}_vscode_go_tools:{{ user_path }}/go
     - {{ deploy_name }}_vscode:{{ user_path }}/.vscode-server
-    - {{ user_path }}/{{ deploy_name }}/launch.json/.vscode-server/.launch.json
+    #- {{ user_path }}/{{ deploy_name }}/launch.json/.vscode-server/.launch.json
     - /etc/localtime:/etc/localtime:ro
     working_dir: /go/src/corteza-server
     tty: true
