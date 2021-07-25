@@ -1,0 +1,19 @@
+- hosts: swarm-01
+  remote_user: root
+  gather_facts: yes
+  roles:
+    - { 
+        role: kanban,
+        letsencrypt_email: "{{ lets_encrypt_mail }}",
+        corteza_dev_enable: false,
+        nginx_network_name: "nginx_net",
+        include_auth: true,
+        #keycloak_client_name:
+        #keycloak_client_secret:
+        auth_provider_domain: "key.jidu.eu",
+        keycloak_redirect: "https://key.jidu.eu/",
+        nginx_run_as: "stack",
+        create_stack_network: true,
+        force_images: true,
+        nginx_domain: "{{ domain }}" #  without subdomain
+      }

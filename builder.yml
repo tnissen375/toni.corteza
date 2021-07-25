@@ -31,3 +31,6 @@
       - { namespace: "registry.{{ domain }}", name: "sshd", tag: "3.13", basenamespace: "", basename: "alpine", basetag: "3.13" }
       - { namespace: "registry.{{ domain }}", name: "go_dev_ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
       - { namespace: "registry.{{ domain }}", name: "node_ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" } 
+      - { namespace: "registry.{{ domain }}", name: "planka", tag: "0.1", basenamespace: "", basename: "node", basetag: "" }
+      - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "22.0.0-apache"  }
+      # - { namespace: "registry.{{ domain }}", name: "planka_dev", tag: "0.1", basenamespace: "", basename: "node", basetag: "16.4.2-buster" }

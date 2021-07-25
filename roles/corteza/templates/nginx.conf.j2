@@ -14,8 +14,8 @@ server {
   include snippets/ssl.conf;
 
 {% if existing_certs is defined and existing_certs|bool==true %}
-  ssl_certificate {{ lookup('vars', certificates.0 + '_pem_path') }};
-  ssl_certificate_key {{ lookup('vars', certificates.0 + '_key_path') }};
+  ssl_certificate {{ ssl_certs_path }}{{ external_domain }}.crt;
+  ssl_certificate_key {{ ssl_private_path }}/{{ ngnix_domain }}.key;
 {% elif container_cert_path is defined %}
   ssl_certificate {{ container_cert_path }};
   ssl_certificate_key {{ container_key_path }};
