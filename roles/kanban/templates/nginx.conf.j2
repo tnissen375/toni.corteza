@@ -1,0 +1,56 @@
+server {
+  server_name {{ nginx_subdomain }}{{ nginx_domain }};
+  listen   80;
+  listen [::]:80;
+
+  return 301 https://$host$request_uri;
+}
+
+server {
+  server_name {{ nginx_subdomain }}{{ nginx_domain }};
+
+  listen 443 ssl http2;
+  listen [::]:443 ssl http2;
+  include snippets/ssl.conf;
+
+{% if existing_certs is defined and existing_certs|bool==true %}
+  ssl_certificate {{ ssl_certs_path }}{{ external_domain }}.crt;
+  ssl_certificate_key {{ ssl_private_path }}/{{ ngnix_domain }}.key;
+{% elif container_cert_path is defined %}
+  ssl_certificate {{ container_cert_path }};
+  ssl_certificate_key {{ container_key_path }};
+{% endif %}
+
+  access_log  /var/log/nginx/access.log;
+  error_log  /var/log/nginx/error.log warn;
+
+  # # Redirect server error pages to the static page /50x.html
+  # #
+  # error_page   500 502 503 504  /50x.html;
+  # location = /50x.html {
+  #         root   /etc/nginx/html;
+  # }
+  
+  # error_page   403 /403.html;
+  # location = /403.html {
+  #         root   /etc/nginx/html;
+  # }
+
+{% if existing_certs is defined and existing_certs|bool==false %}
+  location /.well-known/acme-challenge {
+      types { } default_type "text/plain";
+      root /var/www/letsencrypt;
+      try_files $uri $uri/ =404;
+      break;
+  }
+{% endif %}
+
+ location / {
+{% if include_auth is defined and include_auth|bool==true %}   
+  include snippets/{{ access_group }}_auth.conf;
+{% endif %}
+  set $upstream {{ nginx_upstream }};
+  proxy_pass          $upstream;
+ }
+
+}
