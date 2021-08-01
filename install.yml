@@ -48,13 +48,17 @@
         role: corteza,
         letsencrypt_email: "{{ lets_encrypt_mail }}",
         corteza_dev_enable: false,
-        auth_provider_domain: "key.jidu.eu",
-        keycloak_redirect: "https://key.jidu.eu/",
+        #auth_provider_domain: "key.jidu.eu",
+        auth_bypass: false,
+        auth_provider_domain: "key.hyconcept.de",
+        #keycloak_redirect: "https://key.jidu.eu/",
+        keycloak_redirect: "https://corteza.hyconcept.de/",
+        deploy_name: "corteza",
         include_auth: true,
         nginx_network_name: "nginx_net",
         nginx_run_as: "stack",
         create_stack_network: true,
         force_images: false,
-        nginx_domain: "{{ domain }}", #  without subdomain
+        nginx_domain: "hyconcept.de", #  without subdomain
         tags: [ corteza ]
       }

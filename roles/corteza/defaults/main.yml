@@ -2,11 +2,18 @@
 user: "root"
 user_path: "/root"
 deploy_name: "corteza"
+nginx_domain: ""
 nginx_subdomain: "{{ deploy_name }}."
+enable_ipv6: true # not needed for corteza but if you wanna reach server on ipv6 p.e. keycloak on ipv6 only
+auth_proxy: true
+auth_proxy_client: "Nginx"
+keycloak_realm: "Intern" # the realm which nginx is using in keycloak
+keycloak_client_name: "Nginx" # client name in keycloak
+keycloak_client_secret: "d3367b2d-85fb-46c0-9fcb-15e2dfeb4d9b" # dum
 dns_create: false
 dns_update: false
 nginx_stack: "openresty"
-nginx_stack_keep_alive: true
+nginx_stack_keep_alive: false
 nginx_network_name: "nginx_net"
 ssl_certs_path: /etc/nginx/ssl/certs
 ssl_private_path: /etc/nginx/ssl/private
@@ -20,8 +27,8 @@ corteza_webapp_enable: "true"
 #keycloak_realm: ""
 #keycloak_secret: ""
 include_auth: "false"
-access_group: "web"
-corteza_sink_setup: false
+access_group: "corteza"
+corteza_sink_setup: true
 corteza_mysql_image: "percona:8.0"
 corteza_image_version: "2021.6.x"
 corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"

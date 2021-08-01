@@ -7,13 +7,17 @@
         letsencrypt_email: "{{ lets_encrypt_mail }}",
         corteza_dev_enable: false,
         nginx_network_name: "nginx_net",
+        auth_provider_domain: "key.hyconcept.de",
+        keycloak_redirect: "https://work.hyconcept.de/",
+        deploy_name: "kanban",
         include_auth: true,
         #keycloak_client_name:
         #keycloak_client_secret:
-        auth_provider_domain: "key.jidu.eu",
-        keycloak_redirect: "https://key.jidu.eu/",
         nginx_run_as: "stack",
         create_stack_network: true,
         force_images: true,
-        nginx_domain: "{{ domain }}" #  without subdomain
+        nginx_domain: "hyconcept.de", #  without subdomain
+        tags: [ kanban ],
+        image_kanban: "registry.toni-media.com/planka:0.1",
+        image_file_kanban: "registry.toni-media.com_planka:0.1.tar"
       }

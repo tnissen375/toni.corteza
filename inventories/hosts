@@ -1,4 +1,5 @@
-swarm-01 ansible_ssh_host=157.90.27.108
+#swarm-01 ansible_ssh_host=157.90.27.108
+swarm-01 ansible_ssh_host=2a01:4f8:151:7422:b586:e6b4:9cae:75c1
 
 [docker_engine]
 swarm-01

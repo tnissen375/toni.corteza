@@ -8,7 +8,11 @@ networks:
  {{ stack_network_name }}:
     driver: overlay
     external: true
-{% endif %}    
+{% endif %}
+{% if enable_ipv6 is defined and enable_ipv6|bool==true %}      
+ bridge:
+    external: true
+{% endif %} 
 
 services:
   {{ deploy_name }}_db:
@@ -32,6 +36,7 @@ services:
         condition: on-failure
     healthcheck: { test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"], timeout: 20s, retries: 10 }
 
+#https://docs.cortezaproject.org/corteza-docs/2020.9/dev-ops-guide/index.html
 #https://github.com/cortezaproject/corteza-docs/issues/178
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==false %}
   {{ deploy_name }}:
@@ -40,6 +45,10 @@ services:
     - "80"
     environment:
       AUTH_BASE_URL: "https://{{ external_domain }}/auth"
+      #PROVISION_SETTINGS_AUTH_EXTERNAL_OIDC: "{{ keycloak_client_name }} https://{{ auth_provider_domain }}/auth/realms/{{ keycloak_realm}} {{ keycloak_client_name }} {{ keycloak_client_secret }}"
+      #PROVISION_SETTINGS_AUTH_EXTERNAL_ENABLED: "true"
+      PROVISION_SETTINGS_AUTH_EMAIL_FROM_ADDRESS: "jidu@hyconcept.de"
+      PROVISION_SETTINGS_AUTH_EMAIL_FROM_NAME: "Accounts" 
       CORTEZA_DB_NAME: "{{ deploy_name }}"
       CORTEZA_DB_HOST: "{{ deploy_name }}_db"
       CORTEZA_DB_USER: "{{ deploy_name }}"
@@ -67,6 +76,9 @@ services:
       SMTP_FROM: '"{{ keycloak_smtp_display_name }}" <{{ keycloak_smtp_from }}>'      
     networks:
       - {{ nginx_network_name }}
+{% if enable_ipv6 is defined and enable_ipv6|bool==true %}      
+      - bridge
+{% endif %} 
 {% if create_stack_network is defined and create_stack_network|bool==true %}      
       - {{ stack_network_name }}
 {% endif %}      

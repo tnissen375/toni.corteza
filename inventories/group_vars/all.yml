@@ -1,7 +1,10 @@
 ---
 #Auf allen hosts ist Python 3 installiert // Get rid of deprecation warning
-domain: "toni-media.com"
+domain: "hyconcept.de"
+#domain: "toni-media.com"
 lets_encrypt_mail: "jidumailer@gmail.com"
+keycloak_client_name: 'Nginx'
+keycloak_realm: 'Intern'
 
 ansible_python_interpreter: /usr/bin/python3
 
@@ -13,7 +16,7 @@ configure_firewall: 'true'
 #
 # Role certificates
 #
-existing_certs: 'false'
+existing_certs: 'true'
 
 ntp_manage_config: true
 ntp_timezone: Europe/Berlin

@@ -113,7 +113,6 @@
   when: nginx_stack_keep_alive|bool == true
 
 - name: set cert facts 
-  when: not existing_certs|bool
   include_role:
     name: toni.certificates
     tasks_from: certbot_facts

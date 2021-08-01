@@ -214,7 +214,6 @@
   when: nginx_stack_keep_alive|bool == true
 
 - name: set cert facts 
-  when: not existing_certs|bool
   include_role:
     name: toni.certificates
     tasks_from: certbot_facts
@@ -304,8 +303,14 @@
 - name: Sleep for 180 seconds and continue with play // dev init needs container restart
   wait_for:
     timeout: 180
-  tags: [ never, dev]
+  #tags: [ never, dev] // sink route needs started container as well
   delegate_to: localhost
+
+- name: Delete sink if exist
+  file:
+    state: absent
+    path: "{{ user_path }}/{{ deploy_name }}/sink"
+  when: corteza_sink_setup | bool == true
 
 - name: generate sink route
   command: make sink #-B
