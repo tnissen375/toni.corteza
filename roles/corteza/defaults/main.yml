@@ -48,8 +48,8 @@ corteza_app_repository: "https://github.com/tnissen375/corteza-webapp-compose.gi
 corteza_app_version: "{{ corteza_image_version }}"
 #go_dev_image: "deis/go-dev"
 #go_dev_image_tag: "v1.32.2"
-#image_sshd: "registry.{{ domain }}/sshd:3.13"
-#image_file_sshd: "registry.{{ domain }}_sshd:3.13.tar"
+#image_sshd: "registry.{{ domain }}/sshd:3.14"
+#image_file_sshd: "registry.{{ domain }}_sshd:3.14.tar"
 host_ssh_port: 2223
 image_go_dev_tag: "v1.32.2"
 image_go_dev_ssh: "registry.{{ domain }}/go_dev_ssh:{{ image_go_dev_tag }}"
