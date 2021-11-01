@@ -58,9 +58,18 @@ server {
 {% endif %}
 
  location / {
-{% if include_auth is defined and include_auth|bool==true %}   
+{% if include_auth is defined and include_auth|bool==true %}
   include snippets/{{ access_group }}_auth.conf;
 {% endif %}
+{% if include_xframe is defined and include_xframe|bool==true %}
+    proxy_hide_header X-Frame-Options;
+    add_header X-Frame-Options "ALLOW-FROM {{ nginx_subdomain }}{{ nginx_domain }}";
+    add_header X-Frame-Options "ALLOW-FROM only.{{ nginx_domain }}";
+    proxy_hide_header Content-Security-Policy;
+    add_header Content-Security-Policy "frame-ancestors *.{{ nginx_domain }}";
+{% endif %}
+
+#https://stackoverflow.com/questions/32084604/why-is-keycloak-removing-the-ssl-in-the-redirect-uri
     #proxy_pass    http://backend_{{ nginx_subdomain | replace('.','') }};
     set $upstream {{ nginx_upstream }};
     proxy_pass          $upstream;        

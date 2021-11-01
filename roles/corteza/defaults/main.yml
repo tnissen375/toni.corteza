@@ -27,6 +27,7 @@ corteza_webapp_enable: "true"
 #keycloak_realm: ""
 #keycloak_secret: ""
 include_auth: "false"
+include_xframe: "false" #Nextcloud with Only Office in corteza dashboard
 access_group: "corteza"
 corteza_sink_setup: true
 corteza_mysql_image: "percona:8.0"

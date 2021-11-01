@@ -45,9 +45,10 @@ services:
     - "80"
     environment:
       AUTH_BASE_URL: "https://{{ external_domain }}/auth"
-      #PROVISION_SETTINGS_AUTH_EXTERNAL_OIDC: "{{ keycloak_client_name }} https://{{ auth_provider_domain }}/auth/realms/{{ keycloak_realm}} {{ keycloak_client_name }} {{ keycloak_client_secret }}"
-      #PROVISION_SETTINGS_AUTH_EXTERNAL_ENABLED: "true"
-      PROVISION_SETTINGS_AUTH_EMAIL_FROM_ADDRESS: "jidu@hyconcept.de"
+      PROVISION_SETTINGS_AUTH_EXTERNAL_OIDC: "{{ keycloak_client_name }} https://{{ auth_provider_domain }}/auth/realms/{{ keycloak_realm}} {{ keycloak_client_name }} {{ keycloak_client_secret }}"
+      PROVISION_SETTINGS_AUTH_EXTERNAL_ENABLED: "true"
+      AUTH_EXTERNAL_REDIRECT_URL: "https://{{ external_domain }}/auth/external/openid-connect.{{ keycloak_client_name }}/callback"
+      PROVISION_SETTINGS_AUTH_EMAIL_FROM_ADDRESS: "accounts@{{ domain }}"
       PROVISION_SETTINGS_AUTH_EMAIL_FROM_NAME: "Accounts" 
       CORTEZA_DB_NAME: "{{ deploy_name }}"
       CORTEZA_DB_HOST: "{{ deploy_name }}_db"
