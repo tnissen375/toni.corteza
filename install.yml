@@ -44,6 +44,16 @@
         force_images: true,
         tags: [ host ]
       }
+    - {
+      role: toni.keycloak, 
+      nginx_network_name: "nginx_net",
+      nginx_domain: "hyconcept.de",
+      nginx_run_as: "stack",
+      auth_bypass: "true",
+      letsencrypt_email: "jidumailer@gmail.com",
+      force_images: "True",
+      tags: [ keycloak ]
+      }
     - { 
         role: corteza,
         letsencrypt_email: "{{ lets_encrypt_mail }}",
