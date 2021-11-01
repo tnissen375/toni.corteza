@@ -4,11 +4,11 @@
   roles:
     # uncomment if using a seperate/uninstalled machine (not localhost) for building images
     # - {
-    #     role: base,
+    #     role: toni.base,
     #     configure_firewall: 'true'
     #   }
     # - {
-    #     role: docker
+    #     role: toni.docker
     #   }
     # - {
     #     role: geerlingguy.ntp,
