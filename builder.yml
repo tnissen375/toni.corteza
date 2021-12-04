@@ -24,13 +24,18 @@
         role : toni.buildimages
       }
   vars:
+    force_rebuild: true
     images:
-      - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.9.1", basenamespace: "", basename: "alpine", basetag: "3.14" }
-      - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.9.1" }
-      - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.9.1-alpine-fat" }
-      - { namespace: "registry.{{ domain }}", name: "sshd", tag: "3.14", basenamespace: "", basename: "alpine", basetag: "3.14" }
-      - { namespace: "registry.{{ domain }}", name: "go_dev_ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
-      - { namespace: "registry.{{ domain }}", name: "node_ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" } 
-      - { namespace: "registry.{{ domain }}", name: "planka", tag: "0.1", basenamespace: "", basename: "node", basetag: "" }
-      - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "22.0.0-apache"  }
+      # - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.9.1", basenamespace: "", basename: "alpine", basetag: "3.14" }
+      # - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.9.1" }
+      # - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.9.1-alpine-fat" }
+      # - { namespace: "registry.{{ domain }}", name: "sshd", tag: "3.14", basenamespace: "", basename: "alpine", basetag: "3.14" }
+      # - { namespace: "registry.{{ domain }}", name: "go_dev_ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
+      # - { namespace: "registry.{{ domain }}", name: "node_ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" } 
+      # - { namespace: "registry.{{ domain }}", name: "planka", tag: "0.1", basenamespace: "", basename: "node", basetag: "" }
+      #- { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "23.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "23.0.0-apache"  }
+      #- { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.2.3-apache", basenamespace: "", basename: "nextcloud", basetag: "22.2.3-apache"  }
       # - { namespace: "registry.{{ domain }}", name: "planka_dev", tag: "0.1", basenamespace: "", basename: "node", basetag: "16.4.2-buster" }
+
+# not tested / used
+#- { namespace: "registry.{{ domain }}", name: "nextcloud-apache-base", tag: "23.0.0", basenamespace: "", basename: "php", basetag: "8.0-apache-bullseye"  }            

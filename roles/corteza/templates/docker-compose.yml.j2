@@ -34,8 +34,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    healthcheck: { test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"], timeout: 20s, retries: 10 }
-
+    healthcheck: { test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-p{{ corteza_mysql_root_password }}"], timeout: 20s, retries: 10 }
 #https://docs.cortezaproject.org/corteza-docs/2020.9/dev-ops-guide/index.html
 #https://github.com/cortezaproject/corteza-docs/issues/178
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==false %}

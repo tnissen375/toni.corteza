@@ -28,7 +28,7 @@ services:
       restart_policy:
         condition: on-failure
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U {{ kanban_postgres_user }}"]
+      test: ["CMD-SHELL", "pg_isready -U {{ kanban_postgres_user }} -d {{ kanban_postgres_db }}"]
       interval: 10s
       timeout: 5s
       retries: 5   

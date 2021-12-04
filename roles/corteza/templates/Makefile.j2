@@ -1,5 +1,5 @@
 TAIL=20
-d=$$(date +%Y_%m_%d)
+d=$$(date +%Y%m%d_%H:%M:%S)
 
 DB := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}_db\.*")
 CORTEZA := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*")
