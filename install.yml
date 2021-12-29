@@ -1,73 +1,77 @@
 - import_playbook: builder.yml
   tags: [ build ]
 
-- hosts: swarm-01
-  remote_user: root
-  gather_facts: yes
-  tags: [ host ]
-  roles:
-    - {
-        role: toni.base,
-        configure_ipv4_hostname: true,
-        configure_ipv6_hostname: false,
-        configure_firewall: 'true'
-      }
-    - {
-        role: geerlingguy.ntp,
-        ntp_manage_config: true,
-        ntp_servers: [
-          0.de.pool.ntp.org,
-          1.de.pool.ntp.org,
-          2.de.pool.ntp.org,
-          3.de.pool.ntp.org
-        ]
-      }      
+# - hosts: swarm-01
+#   remote_user: root
+#   gather_facts: yes
+#   tags: [ host ]
+#   roles:
+#     - {
+#         role: toni.base,
+#         configure_ipv4_hostname: true,
+#         configure_ipv6_hostname: false,
+#         configure_firewall: 'true'
+#       }
+#     - {
+#         role: geerlingguy.ntp,
+#         ntp_manage_config: true,
+#         ntp_servers: [
+#           0.de.pool.ntp.org,
+#           1.de.pool.ntp.org,
+#           2.de.pool.ntp.org,
+#           3.de.pool.ntp.org
+#         ]
+#       }      
 
-- hosts: swarm-01
+- hosts: nc-4-02 # swarm-01
   remote_user: root
   gather_facts: yes
   roles:
-    - {
-        role: toni.docker,
-        docker_network_driver: 'overlay', #trigger swarm
-        swarm_interface: "{{ ansible_default_ipv4['interface'] }}", #default wg0
-        tags: [ host ]
-      }
-    - {
-        role: toni.openresty,
-        #docker_network_host: True,
-        nginx_network_name: "nginx_net",
-        nginx_network_driver: "overlay",
-        #docker_network_encrypted: 'true',
-        nginx_run_as: "stack",
-        nginx_swarm_real_ip: true,
-        force_images: true,
-        tags: [ host ]
-      }
-    - {
-      role: toni.keycloak, 
-      nginx_network_name: "nginx_net",
-      nginx_domain: "hyconcept.de",
-      nginx_run_as: "stack",
-      auth_bypass: "true",
-      letsencrypt_email: "jidumailer@gmail.com",
-      force_images: "True",
-      tags: [ keycloak ]
-      }
+    # - {
+    #     role: toni.docker,
+    #     docker_network_driver: 'overlay', #trigger swarm
+    #     swarm_interface: "{{ ansible_default_ipv4['interface'] }}", #default wg0
+    #     tags: [ host ]
+    #   }
+    # - {
+    #     role: toni.openresty,
+    #     #docker_network_host: True,
+    #     nginx_network_name: "nginx_net",
+    #     nginx_network_driver: "overlay",
+    #     #docker_network_encrypted: 'true',
+    #     nginx_run_as: "stack",
+    #     nginx_swarm_real_ip: true,
+    #     force_images: true,
+    #     tags: [ host ]
+    #   }
+    # - {
+    #   role: toni.keycloak, 
+    #   nginx_network_name: "nginx_net",
+    #   nginx_domain: "hyconcept.de",
+    #   nginx_run_as: "stack",
+    #   auth_bypass: "true",
+    #   letsencrypt_email: "jidumailer@gmail.com",
+    #   force_images: "True",
+    #   tags: [ keycloak ]
+    #   }
     - { 
         role: corteza,
+        existing_certs: 'false',
         letsencrypt_email: "{{ lets_encrypt_mail }}",
         corteza_dev_enable: false,
-        #auth_provider_domain: "key.jidu.eu",
         auth_bypass: false,
-        auth_provider_domain: "key.hyconcept.de",
-        #keycloak_redirect: "https://key.jidu.eu/",
+        auth_provider_domain: "key.jidu.de",
+        nginx_stack: "openresty",
         keycloak_redirect: "https://corteza.hyconcept.de/",
         deploy_name: "corteza",
         include_auth: true,
         nginx_network_name: "nginx_net",
+        create_stack_network: true,
+        stack_network_name: "corteza_net",
+        stack_subnet: "10.10.15.0/24",      
         nginx_run_as: "stack",
         create_stack_network: true,
+        dns_create: "false",
         force_images: false,
         nginx_domain: "hyconcept.de", #  without subdomain
         tags: [ corteza ]

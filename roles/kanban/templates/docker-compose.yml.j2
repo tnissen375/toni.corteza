@@ -3,11 +3,9 @@ networks:
  {{ nginx_network_name }}:
     driver: overlay
     external: true
-{% if create_stack_network is defined and create_stack_network|bool==true %}      
  {{ stack_network_name }}:
     driver: overlay
     external: true
-{% endif %}    
 
 services:
   {{ deploy_name }}_db:
@@ -53,9 +51,7 @@ services:
 #bash -c "service ssh start"
     networks:
       - {{ nginx_network_name }}
-{% if create_stack_network is defined and create_stack_network|bool==true %}      
       - {{ stack_network_name }}
-{% endif %}      
     environment:
       BASE_URL: "https://{{ nginx_subdomain }}{{ domain }}"
       DATABASE_URL: "postgresql://{{ kanban_postgres_user }}:{{ kanban_postgres_password }}@{{ deploy_name }}_db/{{ kanban_postgres_db }}"

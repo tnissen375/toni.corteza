@@ -1,0 +1,16 @@
+https://github.com/cloudflare/cfssl/tree/master/doc/api
+
+curl next_cfssl:8888/api/v1/cfssl/health
+{"success":true,"result":{"healthy":true},"errors":[],"messages":[]}
+
+curl next_cfssl:8888/api/v1/cfssl/certinfo -d '{"domain": "next.hyconcept.de"}'
+
+{"success":true,"result":{"subject":{"common_name":"next.hyconcept.de","names":["next.hyconcept.de"]},"issuer":{"common_name":"R3","country":"US","organization":"Let's Encrypt","names":["US","Let's Encrypt","R3"]},"serial_number":"368448844042630458521448806720994980370815","sans":["next.hyconcept.de"],"not_before":"2021-12-04T17:06:14Z","not_after":"2022-03-04T17:06:13Z","sigalg":"SHA256WithRSA","authority_key_id":"14:2E:B3:17:B7:58:56:CB:AE:50:09:40:E6:1F:AF:9D:8B:14:C2:C6","subject_key_id":"48:4B:61:CD:CE:51:31:3D:8C:87:80:04:78:9C:D3:13:6F:27:9C:19","pem":"-----BEGIN CERTIFICATE-----\nMIIFKTCCBBGgAwIBAgISBDrGGivxrYhMsGmkhvr/R5l/MA0GCSqGSIb3DQEBCwUA\nMDIxCzAJBgNVBAYTAlVTMRYwFAYDVQQKEw1MZXQncyBFbmNyeXB0MQswCQYDVQQD\nEwJSMzAeFw0yMTEyMDQxNzA2MTRaFw0yMjAzMDQxNzA2MTNaMBwxGjAYBgNVBAMT\nEW5leHQuaHljb25jZXB0LmRlMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC\nAQEAx4N3v22dxX/aweC30LKBtkqUZ7IZ8ryHclcZVzNioAc4AV+H9U06Gs0B7wd7\nHwr764ggFJSuYxFRGIM+CXfBBj/FK41TdqFzTZOr7+bt+H63VXrDUtBnlTjErM26\nEC3J5PV3eoyesps0HmrNmQQ/78xgT5OagqiLI61YLpfgv7mQ4eLp1QUnWP4+ZUUS\nO7r3YUKB902Y5q3sIcD2a+VmORNgf0yBVPHEnprreMNtHFcWd/195+N+HCDITLln\nAbDMFyg/5qTAQM0JBayHFFDSozefuvdd29Auj7JIWCUhwsjEUPX+4x9Tn6QGk1r2\nep1SurhUU0EW4iuNIwKrCW9pTwIDAQABo4ICTTCCAkkwDgYDVR0PAQH/BAQDAgWg\nMB0GA1UdJQQWMBQGCCsGAQUFBwMBBggrBgEFBQcDAjAMBgNVHRMBAf8EAjAAMB0G\nA1UdDgQWBBRIS2HNzlExPYyHgAR4nNMTbyecGTAfBgNVHSMEGDAWgBQULrMXt1hW\ny65QCUDmH6+dixTCxjBVBggrBgEFBQcBAQRJMEcwIQYIKwYBBQUHMAGGFWh0dHA6\nLy9yMy5vLmxlbmNyLm9yZzAiBggrBgEFBQcwAoYWaHR0cDovL3IzLmkubGVuY3Iu\nb3JnLzAcBgNVHREEFTATghFuZXh0Lmh5Y29uY2VwdC5kZTBMBgNVHSAERTBDMAgG\nBmeBDAECATA3BgsrBgEEAYLfEwEBATAoMCYGCCsGAQUFBwIBFhpodHRwOi8vY3Bz\nLmxldHNlbmNyeXB0Lm9yZzCCAQUGCisGAQQB1nkCBAIEgfYEgfMA8QB2AEHIyrHf\nIkZKEMahOglCh15OMYsbA+vrS8do8JBilgb2AAABfYagB30AAAQDAEcwRQIhAMOJ\nkVL2aAlH0IpHvc0/4jmJYZFPhEeWJt41CvSAn5gHAiBJMUCbJn/cKO4LgML7REfh\nb4ryzR2SeDgeI348JUezwAB3AEalVet1+pEgMLWiiWn0830RLEF0vv1JuIWr8vxw\n/m1HAAABfYagB5IAAAQDAEgwRgIhANpMOXlJ8ojs3Z4Q/k6LvUJ7gMYmyqY6A367\nUnahC08DAiEA65FDHdHucgrLyQf7/QfYXFWFo+huq9wvDKTCdJwbgK8wDQYJKoZI\nhvcNAQELBQADggEBAA65ECtTfs6mD68tBTVBcONdCIVAvmT6NDrURM1xOmMNNmim\nRW2XNX0eYhh6QI89KTgJg4W0nhDtem93U5bqAkTtB3q14m2CRr2d/L6RbsXL5CVu\nFqNzFODurSjGVSYTeovgmSNhVkMhfjHH7t41iP4wzsiQtNfKeH02TbSai9Y7mfNT\nrie2YBgdHfAkXjYvY1dnNt6UzJD3h6g39XUoCwktqN55VCfBy2Ecx0lhmyuzklTp\nctQTsaJVc2veiDOQKPMr6d2cGIyV99PxBfLk5Rd8b6i4mnt20ijwfoxnu0sDD7YX\nSf8blVTDfXlBn+lMAJ4DLTaATCItN5R9Gx51ZeU=\n-----END CERTIFICATE-----\n"},"errors":[],"messages":[]}
+
+{"success":false,"result":null,"errors":[{"code":0,"message":"unexpected end of JSON input"}],"messages":[]} 
+
+
+orkflow 263314013868261378 step 16 execution failed: unable to create String: unable to cast map[string]expr.TypedValue{"errors":(*expr.Any)(0xc000996c60), "messages":(*expr.Any)(0xc000996c90), "result":(*expr.Any)(0xc000996c30), "success":(*expr.Boolean)(0xc000f8e300)} of type map[string]expr.TypedValue to string
+
+
+https://github.com/cortezaproject/corteza-ext/blob/2020.12.x/docusign/server-scripts/docusign/oauth/RefreshToken.js

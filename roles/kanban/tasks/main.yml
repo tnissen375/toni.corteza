@@ -11,12 +11,12 @@
   loop:
     "{{ dir_exists }}"
 
-- name: Deploy .env
-  template:
-    src: ".env.j2"
-    dest: "{{ user_path }}/{{ deploy_name }}/.env"
-  tags: [ never, dev]
-  when: nginx_conf_file.stat.exists
+# - name: Deploy .env
+#   template:
+#     src: ".env.j2"
+#     dest: "{{ user_path }}/{{ deploy_name }}/.env"
+#   tags: [ never, dev]
+#   when: nginx_conf_file.stat.exists
 
 - name: Deploy Make
   template:

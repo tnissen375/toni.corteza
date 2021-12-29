@@ -6,7 +6,7 @@ nginx_subdomain: "{{ deploy_name }}."
 dns_create: false
 dns_update: false
 nginx_stack: "openresty"
-nginx_stack_keep_alive: true
+nginx_stack_keep_alive: false
 nginx_network_name: "nginx_net"
 ssl_certs_path: /etc/nginx/ssl/certs
 ssl_private_path: /etc/nginx/ssl/private

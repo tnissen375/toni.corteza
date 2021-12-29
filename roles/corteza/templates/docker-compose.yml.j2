@@ -42,7 +42,9 @@ services:
     image: {{ corteza_image }}
     ports:
     - "80"
-    environment:
+    environment:      
+      CORREDOR_ENABLED: "true"
+      CORREDOR_ADDR: "corredor:80"
       AUTH_BASE_URL: "https://{{ external_domain }}/auth"
       PROVISION_SETTINGS_AUTH_EXTERNAL_OIDC: "{{ keycloak_client_name }} https://{{ auth_provider_domain }}/auth/realms/{{ keycloak_realm}} {{ keycloak_client_name }} {{ keycloak_client_secret }}"
       PROVISION_SETTINGS_AUTH_EXTERNAL_ENABLED: "true"
@@ -89,6 +91,22 @@ services:
       restart_policy:
         condition: on-failure      
     healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #only container/webserver not if checks passed
+
+  {{ deploy_name }}_corredor:
+    image: cortezaproject/corteza-server-corredor:{{ corteza_image_version }}
+    networks:
+{% if create_stack_network is defined and create_stack_network|bool==true %}      
+      - {{ stack_network_name }}
+{% else %}
+      - {{ nginx_network_name }}
+{% endif %}   
+    ports:
+    - "80"
+    environment:
+      CORREDOR_EXEC_CSERVERS_API_HOST: "{{ external_domain }}"
+      CORREDOR_EXEC_CSERVERS_API_BASEURL_TEMPLATE: "http://{{ deploy_name }}/{service}"
+    volumes:
+    - {{ user_path }}/{{ deploy_name }}/corredor:/corredor/usr
 
 #https://github.com/thecodingmachine/gotenberg        
   pdf:

@@ -33,9 +33,10 @@
       # - { namespace: "registry.{{ domain }}", name: "go_dev_ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
       # - { namespace: "registry.{{ domain }}", name: "node_ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" } 
       # - { namespace: "registry.{{ domain }}", name: "planka", tag: "0.1", basenamespace: "", basename: "node", basetag: "" }
-      #- { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "23.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "23.0.0-apache"  }
-      #- { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.2.3-apache", basenamespace: "", basename: "nextcloud", basetag: "22.2.3-apache"  }
-      # - { namespace: "registry.{{ domain }}", name: "planka_dev", tag: "0.1", basenamespace: "", basename: "node", basetag: "16.4.2-buster" }
+      # - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "23.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "23.0.0-apache"  }
+      # - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.2.3-apache", basenamespace: "", basename: "nextcloud", basetag: "22.2.3-apache"  }
+      # - { namespace: "registry.{{ domain }}", name: "planka_dev", tag: "0.1", basenamespace: "", basename: "node", basetag: "buster" }
+      - { namespace: "registry.{{ domain }}", name: "ansible_corredor", tag: "2.11-infra-0.39", basenamespace: "", basename: "cytopia/ansible", basetag: "2.11-infra-0.39" }
 
 # not tested / used
 #- { namespace: "registry.{{ domain }}", name: "nextcloud-apache-base", tag: "23.0.0", basenamespace: "", basename: "php", basetag: "8.0-apache-bullseye"  }            
