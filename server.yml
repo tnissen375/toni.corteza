@@ -1,17 +1,17 @@
 # Copy Image
-# - hosts: nc-4-02
-#   become: True
-#   gather_facts: yes
-#   tasks:
-#   - name: Copy Image
-#     include_role: { name: toni.buildimages, tasks_from: copy }
-#   vars:
-#     include_image_files:
-#         image: "registry.hyconcept.de_ansible_corredor:2.11-infra-0.39"
+- hosts: targets
+  become: True
+  gather_facts: yes
+  tasks:
+  - name: Copy Image
+    include_role: { name: toni.buildimages, tasks_from: copy }
+  vars:
+    include_image_files:
+        image: "registry.hyconcept.de_ansible_corredor:2.10-infra-0.39"
+  tags: [ copyimage ]
 
 # Renew cert
-# Copy Image
-- hosts: nc-4-02
+- hosts: targets
   become: True
   gather_facts: yes
   tasks:
@@ -19,7 +19,7 @@
     include_role: { name: toni.certificates, tasks_from: certbot_renew }
   vars:
     letsencrypt_domainname: "{{ certbot_server }}"
-
+  tags: [ renew ]
     #letsencrypt_endpoint
     #letsencrypt_domainname
     #letsencrypt_email

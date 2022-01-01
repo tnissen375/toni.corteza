@@ -36,7 +36,18 @@
       # - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "23.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "23.0.0-apache"  }
       # - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.2.3-apache", basenamespace: "", basename: "nextcloud", basetag: "22.2.3-apache"  }
       # - { namespace: "registry.{{ domain }}", name: "planka_dev", tag: "0.1", basenamespace: "", basename: "node", basetag: "buster" }
-      - { namespace: "registry.{{ domain }}", name: "ansible_corredor", tag: "2.11-infra-0.39", basenamespace: "", basename: "cytopia/ansible", basetag: "2.11-infra-0.39" }
+      - { namespace: "registry.{{ domain }}", name: "ansible_corredor", tag: "2.10-infra-0.39", basenamespace: "", basename: "cytopia/ansible", basetag: "2.10-infra-0.39" }
 
 # not tested / used
 #- { namespace: "registry.{{ domain }}", name: "nextcloud-apache-base", tag: "23.0.0", basenamespace: "", basename: "php", basetag: "8.0-apache-bullseye"  }            
+
+#ansible-galaxy install -r requirements.yml
+#ansible-playbook server.yml -i ../toni.ansible_inventories/server --tags "renew" --vault-id corteza@vault --vault-password-file ./vault --extra-vars "certbot_server=corteza.hyconcept.de letsencrypt_email=t.nissen@hyconcept.de ansible_ssh_host=89.58.9.197"
+
+#https://stackoverflow.com/questions/47629756/how-can-i-get-the-returned-value-from-the-child-process-exec-in-javascript
+#https://stackoverflow.com/questions/12941083/execute-and-get-the-output-of-a-shell-command-in-node-js
+
+
+
+ansible-playbook server.yml -i ../toni.ansible_inventories/server --tags "renew" --vault-id corteza@vault --vault-password-file ./vault --extra-vars "certbot_server=corteza.hyconcept.de letsencrypt_email=t.nissen@hyconcept.de ansible_ssh_host=89.58.9.197"
+"./server.yml -i ../toni.ansible_inventories/server --tags \"renew\" --extra-vars " + "\"" + "ansible_ssh_host=89.58.9.197 certbot_server="+ replace (record.values.Domain,"https://","",1) + " letsencrypt_email=" + record.values.Email + "\""

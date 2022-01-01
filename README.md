@@ -13,12 +13,12 @@ For any other dns provider you will have to either adjust the the toni.dns role 
 
 Edit hosts file and adjust ansible_ssh_host to your server IP:
 ```bash
-nano inventories/hosts
+nano <inventories>/hosts
 ```
 
 Edit role variables to fit your need:
 ```bash
-nano inventories/group_vars/all.yml
+nano <inventories>/group_vars/all.yml
 ```
 
 ```yaml
@@ -62,7 +62,7 @@ api_token: # only necessary if not set by toni.dns role
 On the first run this role will build some "basic" docker images on the installer machine - no docker registry is needed. This has to be done only once (or when a new  image version is needed) and takes several minutes due to creation of these images especially because of openresty/dhparam.
 
 The images are stored at your installer machine, p.e. WSL2 and transfered to target machines if needed. If you ever need to tigger or rebuild the images: 
-`ansible-playbook builder.yml -i inventories --vault-id corteza@vault`
+`ansible-playbook builder.yml -i <inventories> --vault-id corteza@vault`
 
 Normally install the ansible requirements and you are good to go. 
 `ansible-galaxy install -r requirements.yml`
@@ -71,20 +71,20 @@ If you have any doubts check the requirements-section at the end.
 
 ### Basic setup (run once)
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "build, host"
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "build, host"
 ```
 
 ### Production
 Deploy complete production
 ```bash
-ansible-playbook install.yml -i inventories --vault-id corteza@vault --tags "corteza" --skip-tags "dev,app"
+ansible-playbook install.yml -i <inventories> --vault-id corteza@vault --tags "corteza" --skip-tags "dev,app"
 ```
 
 ### Development corteza core
 Deploy developement branch, deploy_name corresponds to the subdomain where the app is deployed (make sure you set DNS records at your DNS-server). Specify extra-vars for repository if needed. Set extra var `corteza_webapp_enable=false` if you want to debug corteza apps.
 
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, dev" --skip-tags "app" --extra-vars "deploy_name=dev corteza_webapp_enable=true corteza_dev_enable=true"
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, dev" --skip-tags "app" --extra-vars "deploy_name=dev corteza_webapp_enable=true corteza_dev_enable=true"
 ```
 
 ### Development corteza apps 
@@ -92,20 +92,21 @@ ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "c
 You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
 Make sure you have created dns records for the subdomains.
 If you are using hetzner server this can be done automaticly, you have to specify your api tokens in inventory from toni.corteza or in toni.dns role:
+Change the <inventories> path in the examples accordingly to your ansible installation.
 
 Example with token from toni.dns role:
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id dns@vault --vault-password-file ../toni.dns/vault --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=one
+ansible-playbook ./install.yml -i <inventories> --vault-id dns@vault --vault-password-file ../toni.dns/vault --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=one
 corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-one.git corteza_app_version=2021.3.x host_ssh_port=2226 nginx_stack_keep_alive=true dns_create=true corteza_app_enable=true"
 ```
 
 Example with already (manual) setup dns records (apps: compose, admin and one), chosse different `host_ssh_port` for each app.
 ```bash
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224 nginx_stack_keep_alive=true corteza_app_enable=true"
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224 nginx_stack_keep_alive=true corteza_app_enable=true"
 
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=admin corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-admin.git corteza_app_version=2021.3.x host_ssh_port=2225 nginx_stack_keep_alive=true corteza_app_enable=true"
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=admin corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-admin.git corteza_app_version=2021.3.x host_ssh_port=2225 nginx_stack_keep_alive=true corteza_app_enable=true"
 
-ansible-playbook ./install.yml -i inventories --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=workflow
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=workflow
 corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-workflow.git corteza_app_version=2021.3.x host_ssh_port=2227 nginx_stack_keep_alive=true corteza_app_enable=true"
 ```
 
@@ -209,7 +210,7 @@ Off course you can add all values in clear if you dont want to push your changes
 
 
 ```bash
-nano inventories/group_vars/all.yml
+nano <inventories>/group_vars/all.yml
 ```
 
 The roles which are used to install corteza are not made for this purpose only. I m usin these roles as a universal base for installing a lot of different applications, normally behind an authenticating reverse proxy (openresty/nginx). By now i havent integrated keycloak in the corteza stack but its on my roadmap.
@@ -269,7 +270,7 @@ Wanna have a look at the just stored values?
 Sure. Thats possible if you have the correct vault pass.
 
 ```bash
-ansible localhost -m debug -a var="keycloak_smtp_password" -i inventories --vault-id corteza@vault
+ansible localhost -m debug -a var="keycloak_smtp_password" -i <inventories> --vault-id corteza@vault
 ```
 
 ## Debug with VS Code
@@ -306,7 +307,6 @@ https://devtools.vuejs.org/guide/installation.html
 *todo*: add guide ;)
 
 ## Whats up next?
-- Summer holiday :)
 - Extend documentation
 - ~~Guide on go debugging~~
 - Guide on node debugging
