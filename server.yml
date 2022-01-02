@@ -23,4 +23,16 @@
     #letsencrypt_endpoint
     #letsencrypt_domainname
     #letsencrypt_email
-    
+
+# Make
+- hosts: targets
+  become: True
+  gather_facts: yes
+  tasks:
+  - name: Make cmd
+    include_role: { name: toni.base, tasks_from: make.yml }
+  vars:
+    cmd: "{{ cmd }}"
+    cmd_args: "{{ cmd_args }}"
+    stack: "{{ stack }}"
+  tags: [ make ]
