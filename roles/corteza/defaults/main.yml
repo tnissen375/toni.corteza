@@ -5,11 +5,12 @@ deploy_name: "corteza"
 nginx_domain: ""
 nginx_subdomain: "{{ deploy_name }}."
 enable_ipv6: true # not needed for corteza but if you wanna reach server on ipv6 p.e. keycloak on ipv6 only
+enable_backup: true
 auth_proxy: false
 auth_proxy_client: "Nginx"
 keycloak_realm: "Intern" # the realm which nginx is using in keycloak
 keycloak_client_name: "Nginx" # client name in keycloak
-keycloak_client_secret: "d3367b2d-85fb-46c0-9fcb-15e2dfeb4d9b" # dum
+keycloak_client_secret: "d3367b2d-85fb-46c0-9fcb-15e2dfeb4d9b" # dummy -> allways change!!
 dns_create: false
 dns_update: false
 nginx_stack: "openresty"

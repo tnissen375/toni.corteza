@@ -329,6 +329,16 @@
   when: corteza_sink_setup | bool == true
   ignore_errors: true
 
+- name: create backup daily backup by cron file under /etc/cron.d
+  when: enable_backup|bool==true
+  cron:
+    name: Create backup
+    weekday: "0"
+    minute: "0"
+    hour: "2"
+    user: root
+    job: "{{ user_path }}/{{ deploy_name }}/make completebackup"
+
 #make restoredb file=/backup/corteza_db_2021_06_01.sql.gz
 
 # - debug:
