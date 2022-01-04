@@ -28,10 +28,6 @@
   tasks:
   - name: Make cmd
     include_role: { name: toni.base, tasks_from: make.yml }
-  vars:
-    cmd: "{{ cmd }}"
-    cmd_args: "{{ cmd_args }}"
-    stack: "{{ stack }}"
   tags: [ make ]
 
 # Make
@@ -40,9 +36,4 @@
   tasks:
   - name: rsync
     include_role: { name: toni.base, tasks_from: rsync.yml }
-  vars:
-    src: src
-    dest: dest
-    mode: mode
-    ex:  ex | false
   tags: [ rsync ]
