@@ -335,9 +335,9 @@
     name: Create backup
     weekday: "0"
     minute: "0"
-    hour: "2"
+    hour: "4"
     user: root
-    job: "{{ user_path }}/{{ deploy_name }}/make completebackup"
+    job: "make -C {{ user_path }}/{{ deploy_name }} completebackup"
 
 #make restoredb file=/backup/corteza_db_2021_06_01.sql.gz
 
