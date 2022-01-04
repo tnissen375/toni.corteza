@@ -42,15 +42,19 @@ services:
     image: {{ corteza_image }}
     ports:
     - "80"
-    environment:      
+    environment:  
+{% if enable_corredor is defined and enable_corredor|bool==true %}
       CORREDOR_ENABLED: "true"
       CORREDOR_ADDR: "corredor:80"
+{% endif %}
       AUTH_BASE_URL: "https://{{ external_domain }}/auth"
+{% if enable_provision is defined and enable_provision|bool==true %}      
       PROVISION_SETTINGS_AUTH_EXTERNAL_OIDC: "{{ keycloak_client_name }} https://{{ auth_provider_domain }}/auth/realms/{{ keycloak_realm}} {{ keycloak_client_name }} {{ keycloak_client_secret }}"
       PROVISION_SETTINGS_AUTH_EXTERNAL_ENABLED: "true"
       AUTH_EXTERNAL_REDIRECT_URL: "https://{{ external_domain }}/auth/external/openid-connect.{{ keycloak_client_name }}/callback"
-      PROVISION_SETTINGS_AUTH_EMAIL_FROM_ADDRESS: "accounts@{{ domain }}"
-      PROVISION_SETTINGS_AUTH_EMAIL_FROM_NAME: "Accounts" 
+      PROVISION_SETTINGS_AUTH_EMAIL_FROM_ADDRESS: "no-reply@{{ domain }}"
+      PROVISION_SETTINGS_AUTH_EMAIL_FROM_NAME: "no-reply"
+{% endif %}      
       CORTEZA_DB_NAME: "{{ deploy_name }}"
       CORTEZA_DB_HOST: "{{ deploy_name }}_db"
       CORTEZA_DB_USER: "{{ deploy_name }}"
@@ -92,8 +96,10 @@ services:
         condition: on-failure      
     healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #only container/webserver not if checks passed
 
+{% if enable_corredor is defined and enable_corredor|bool==true %}      
   {{ deploy_name }}_corredor:
-    image: cortezaproject/corteza-server-corredor:{{ corteza_image_version }}
+    image: {{ corredor_image }}
+#    image: registry.hyconcept.de/ansible_corredor:2.10-infra-0.39
     networks:
 {% if create_stack_network is defined and create_stack_network|bool==true %}      
       - {{ stack_network_name }}
@@ -105,8 +111,16 @@ services:
     environment:
       CORREDOR_EXEC_CSERVERS_API_HOST: "{{ external_domain }}"
       CORREDOR_EXEC_CSERVERS_API_BASEURL_TEMPLATE: "http://{{ deploy_name }}/{service}"
+      CORREDOR_LOG_ENABLED: "true"
+      CORREDOR_DEBUG: "true"
+      CORREDOR_EXT_SERVER_SCRIPTS_WATCH: "true"
+#      ANSIBLE_STRATEGY_PLUGINS: /usr/lib/python3.8/site-packages/ansible_mitogen/plugins/strategy
+#      ANSIBLE_STRATEGY: mitogen_linear
     volumes:
     - {{ user_path }}/{{ deploy_name }}/corredor:/corredor/usr
+#    - /root/.ssh/:/root/.ssh/:ro
+#    - ./ansible:/data
+{% endif %}
 
 #https://github.com/thecodingmachine/gotenberg        
   pdf:

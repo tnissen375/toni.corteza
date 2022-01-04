@@ -6,6 +6,7 @@ nginx_domain: ""
 nginx_subdomain: "{{ deploy_name }}."
 enable_ipv6: true # not needed for corteza but if you wanna reach server on ipv6 p.e. keycloak on ipv6 only
 enable_backup: true
+enable_corredor: false
 auth_proxy: false
 auth_proxy_client: "Nginx"
 keycloak_realm: "Intern" # the realm which nginx is using in keycloak
@@ -32,8 +33,10 @@ include_xframe: "false" #Nextcloud with Only Office in corteza dashboard
 access_group: "corteza"
 corteza_sink_setup: true
 corteza_mysql_image: "percona:8.0"
-corteza_image_version: "2021.6.x"
-corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"
+corteza_image_version: "2021.9.5"
+corteza_image: "cortezaproject/corteza:{{ corteza_image_version }}"
+corredor_image: "cortezaproject/corteza-server-corredor:{{ corteza_image_version }}"
+#corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"
 pdf_image_version: "6"
 pdf_image: "thecodingmachine/gotenberg:{{ pdf_image_version }}"
 corteza_mysql_user: "corteza"
