@@ -26,9 +26,9 @@
   vars:
     force_rebuild: true
     images:
-      # - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.9.1", basenamespace: "", basename: "alpine", basetag: "3.14" }
-      # - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.9.1" }
-      # - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.9.1-alpine-fat" }
+      - { namespace: "registry.{{ domain }}", name: "openresty_base", tag: "1.19.9.1", basenamespace: "", basename: "alpine", basetag: "3.14" }
+      - { namespace: "registry.{{ domain }}", name: "openresty_base_fat", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base", basetag: "1.19.9.1" }
+      - { namespace: "registry.{{ domain }}", name: "openresty", tag: "1.19.9.1-alpine-fat", basenamespace: "", basename: "openresty_base_fat", basetag: "1.19.9.1-alpine-fat" }
       # - { namespace: "registry.{{ domain }}", name: "sshd", tag: "3.14", basenamespace: "", basename: "alpine", basetag: "3.14" }
       # - { namespace: "registry.{{ domain }}", name: "go_dev_ssh", tag: "v1.32.2", basenamespace: "deis", basename: "go-dev", basetag: "v1.32.2" }
       # - { namespace: "registry.{{ domain }}", name: "node_ssh", tag: "14", basenamespace: "", basename: "node", basetag: "14" } 
@@ -36,18 +36,4 @@
       # - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "23.0.0-apache", basenamespace: "", basename: "nextcloud", basetag: "23.0.0-apache"  }
       # - { namespace: "registry.{{ domain }}", name: "nextcloud", tag: "22.2.3-apache", basenamespace: "", basename: "nextcloud", basetag: "22.2.3-apache"  }
       # - { namespace: "registry.{{ domain }}", name: "planka_dev", tag: "0.1", basenamespace: "", basename: "node", basetag: "buster" }
-      - { namespace: "registry.{{ domain }}", name: "ansible_corredor", tag: "2.10-infra-0.39", basenamespace: "", basename: "cytopia/ansible", basetag: "2.10-infra-0.39" }
-
-# not tested / used
-#- { namespace: "registry.{{ domain }}", name: "nextcloud-apache-base", tag: "23.0.0", basenamespace: "", basename: "php", basetag: "8.0-apache-bullseye"  }            
-
-#ansible-galaxy install -r requirements.yml
-#ansible-playbook server.yml -i ../toni.ansible_inventories/server --tags "renew" --vault-id corteza@vault --vault-password-file ./vault --extra-vars "certbot_server=corteza.hyconcept.de letsencrypt_email=t.nissen@hyconcept.de ansible_ssh_host=89.58.9.197"
-
-#https://stackoverflow.com/questions/47629756/how-can-i-get-the-returned-value-from-the-child-process-exec-in-javascript
-#https://stackoverflow.com/questions/12941083/execute-and-get-the-output-of-a-shell-command-in-node-js
-
-
-
-ansible-playbook server.yml -i ../toni.ansible_inventories/server --tags "renew" --vault-id corteza@vault --vault-password-file ./vault --extra-vars "certbot_server=corteza.hyconcept.de letsencrypt_email=t.nissen@hyconcept.de ansible_ssh_host=89.58.9.197"
-"./server.yml -i ../toni.ansible_inventories/server --tags \"renew\" --extra-vars " + "\"" + "ansible_ssh_host=89.58.9.197 certbot_server="+ replace (record.values.Domain,"https://","",1) + " letsencrypt_email=" + record.values.Email + "\""
+      # - { namespace: "registry.{{ domain }}", name: "ansible_corredor", tag: "2.10-infra-0.39", basenamespace: "", basename: "cytopia/ansible", basetag: "2.10-infra-0.39" }
