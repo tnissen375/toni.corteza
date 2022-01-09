@@ -96,7 +96,7 @@ services:
         condition: on-failure      
     healthcheck: { test: ["CMD", "curl", "http://localhost/healthcheck"], timeout: 3s, interval: 60s, retries: 10 } #only container/webserver not if checks passed
 
-{% if enable_corredor is defined and enable_corredor|bool==true %}      
+{% if enable_corredor is defined and enable_corredor|bool==true %}  
   {{ deploy_name }}_corredor:
     image: {{ corredor_image }}
 #    image: registry.hyconcept.de/ansible_corredor:2.10-infra-0.39

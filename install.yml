@@ -23,7 +23,7 @@
         ]
       }      
 
-- hosts: targets 
+- hosts: targets
   remote_user: root
   gather_facts: yes
   roles:
@@ -31,48 +31,29 @@
         role: toni.docker,
         docker_network_driver: 'overlay', #trigger swarm
         swarm_interface: "{{ ansible_default_ipv4['interface'] }}", #default wg0
-        tags: [ host ]
+        tags: [ host, docker ]
       }
     - {
         role: toni.openresty,
-        #docker_network_host: True,
-        nginx_network_name: "nginx_net",
-        nginx_network_driver: "overlay",
-        #docker_network_encrypted: 'true',
-        nginx_run_as: "stack",
-        nginx_swarm_real_ip: true,
+        openresty_image: "registry.{{ domain }}_openresty:1.19.9.1-alpine-fat",
         force_images: true,
-        tags: [ host ]
+        tags: [ host, openresty ]
       }
     - {
-      role: toni.keycloak, 
-      nginx_network_name: "nginx_net",
-      nginx_domain: "hyconcept.de",
-      nginx_run_as: "stack",
-      auth_bypass: "true",
-      letsencrypt_email: "jidumailer@gmail.com",
-      force_images: "True",
-      tags: [ keycloak ]
+        role: toni.keycloak, 
+        nginx_domain: "yd2m.com",
+        nginx_access_loglevel: "production", #openresty ip log anonymized
+        auth_bypass: "true",
+        tags: [ keycloak ]
       }
     - { 
         role: corteza,
         existing_certs: 'false',
-        letsencrypt_email: "{{ lets_encrypt_mail }}",
         corteza_dev_enable: false,
         auth_bypass: false,
-        auth_provider_domain: "key.jidu.de",
-        nginx_stack: "openresty",
-        keycloak_redirect: "https://corteza.hyconcept.de/",
         deploy_name: "corteza",
         include_auth: true,
-        nginx_network_name: "nginx_net",
         create_stack_network: true,
-        stack_network_name: "corteza_net",
         stack_subnet: "10.10.15.0/24",      
-        nginx_run_as: "stack",
-        create_stack_network: true,
-        dns_create: "false",
-        force_images: false,
-        nginx_domain: "hyconcept.de", #  without subdomain
         tags: [ corteza ]
       }

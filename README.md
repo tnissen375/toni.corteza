@@ -24,7 +24,7 @@ nano <inventories>/group_vars/all.yml
 ```yaml
 ---
 domain: "" # <- Put you domainname here
-lets_encrypt_mail: "" # <- Put your email here
+letsencrypt_email: "" # <- Put your email here
 # Mail account which is used not only for keycloak ;)
 # Examle gmail / google account needs to be allow insecure auth
 keycloak_smtp_password: # <- Put your email password here 
@@ -59,7 +59,7 @@ api_token: # only necessary if not set by toni.dns role
 
 ## Installation
 
-On the first run this role will build some "basic" docker images on the installer machine - no docker registry is needed. This has to be done only once (or when a new  image version is needed) and takes several minutes due to creation of these images especially because of openresty/dhparam.
+On the first run this role will build some "basic" docker images on the installer machine - no docker registry is needed. This has to be done only once (or when a new image version is needed) and takes several minutes due to creation of these images especially because of openresty/dhparam.
 
 The images are stored at your installer machine, p.e. WSL2 and transfered to target machines if needed. If you ever need to tigger or rebuild the images: 
 `ansible-playbook builder.yml -i <inventories> --vault-id corteza@vault`
@@ -77,7 +77,7 @@ ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags 
 ### Production
 Deploy complete production
 ```bash
-ansible-playbook install.yml -i <inventories> --vault-id corteza@vault --tags "corteza" --skip-tags "dev,app"
+ansible-playbook install.yml -i <inventories> --vault-id corteza@vault --tags "corteza" --skip-tags "dev,app" --extra-vars "ansible_ssh_host=89.58.8.242"
 ```
 
 ### Development corteza core
@@ -219,7 +219,7 @@ So some variable may be unexpected but thats ok (at least for me) and maybe will
 ```yaml
 ---
 domain: "" # <- Put you domainname her
-lets_encrypt_mail: "" #<- Put your email here, if not gmail some other settings have to be changed also
+letsencrypt_email: "" #<- Put your email here, if not gmail some other settings have to be changed also
 
 keycloak_smtp_password: !vault |
           $ANSIBLE_VAULT;1.2;AES256;corteza

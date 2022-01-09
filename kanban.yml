@@ -1,25 +1,14 @@
-- hosts: nc-4-02 # swarm-01
+- hosts: targets
   remote_user: root
   gather_facts: yes
   roles:
     - { 
         role: kanban,
-        existing_certs: 'false',
-        letsencrypt_email: "{{ lets_encrypt_mail }}",
-        corteza_dev_enable: false,
-        nginx_stack: 'openresty',
-        nginx_network_name: "nginx_net",
         stack_network_name: "corteza_net",
-        dns_create: "false",        
-        create_stack_network: false,
-        auth_provider_domain: "key.jidu.de",
-        keycloak_redirect: "https://hyconcept.de/",
         deploy_name: "kanban",
         include_auth: true,
         #keycloak_client_name:
         #keycloak_client_secret:
-        nginx_run_as: "stack",
-        force_images: false,
         nginx_domain: "hyconcept.de", #  without subdomain
         tags: [ kanban ],
         image_kanban: "registry.hyconcept.de/planka:0.1",
