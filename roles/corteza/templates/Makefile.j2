@@ -8,9 +8,9 @@ CORREDOR := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "corteza_
 {% endif %}
 NGINX := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ nginx_stack }}_nginx-proxy\.*")
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==false %}
-BIN := "corteza-server"
+BIN := corteza-server
 {% else %}
-BIN := "/go/src/corteza-server/gin-bin"
+BIN := /go/src/corteza-server/gin-bin
 {% endif %}
 
 {% if enable_corredor is defined and enable_corredor|bool==true %}
@@ -35,11 +35,15 @@ sinkhelp:
 
 sink:
 	docker exec $(CORTEZA) $(BIN) sink signature --method POST --content-type email
+
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
 debugdev:
 	docker exec -d $(CORTEZA) sh -c 'kill $$(pgrep dlv) || echo "dlv not running" && dlv attach -l 127.0.0.1:42325 --headless --log=true --accept-multiclient --api-version=2 $$(pgrep gin-bin)'
-{% endif %}
 
+corteza:
+	docker exec $(CORTEZA) sh -c '$(BIN) $(cmd)'
+
+{% endif %}
 ps:
 	docker stack ps {{ deploy_name }} --no-trunc
 
@@ -82,7 +86,6 @@ purge:
 	find {{ user_path }}/{{ deploy_name }}/backup/*.gz  -mtime +10 -delete &> /dev/null
 
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
-
 apps:
 	docker exec $(CORTEZA) sh -c 'exec make --directory=/go/src/corteza-server/webapp'
 

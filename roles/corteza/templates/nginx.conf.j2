@@ -19,6 +19,11 @@ server {
   listen [::]:443 ssl http2;
   include snippets/ssl.conf;
 
+  add_header x-frame-options "SAMEORIGIN" always;
+# does not work due to photoswipe violating inline-script
+#  add_header Content-Security-Policy "default-src 'self' *.{{ domain }}";
+  add_header X-XSS-Protection "1; mode=block" always;
+
 {% if existing_certs is defined and existing_certs|bool==true %}
   ssl_certificate {{ ssl_certs_path }}/{{ nginx_domain }}.crt;
   ssl_certificate_key {{ ssl_private_path }}/{{ nginx_domain }}.key;
@@ -54,6 +59,12 @@ server {
 {% if auth_proxy is defined and auth_proxy|bool==true %}
  location /auth/login {
    return 301 https://$host/auth/external/openid-connect.{{ auth_proxy_client }};
+ }
+{% endif %}
+
+{% if enable_provision is defined and enable_provision|bool==true and enable_autologin is defined and enable_autologin|bool==true %}
+ location /auth/login {
+   return 301 https://corteza.{{ nginx_domain }}/auth/external/openid-connect.Nginx;
  }
 {% endif %}
 

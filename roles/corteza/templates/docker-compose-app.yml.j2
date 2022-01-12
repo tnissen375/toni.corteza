@@ -33,7 +33,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-    #healthcheck: { test: ["CMD", "node", "./healthcheck.js"], timeout: 3s, interval: 60s, retries: 20 }
+    healthcheck: { test: ["CMD", "node", "./healthcheck.js"], timeout: 3s, interval: 60s, retries: 20 }
 
 volumes:
   nodemodules:
