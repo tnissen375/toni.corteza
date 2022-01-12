@@ -21,7 +21,7 @@ corteza_webapp_enable: "true"
 #keycloak_secret: ""
 include_auth: "true"
 access_group: "corteza"
-corteza_sink_setup: false
+enable_sink: false
 kanban_postgres_user: "planka"
 kanban_postgres_db: "planka"
 kanban_postgres_password: "pDsQsg62AW2ojDb4vGeh05nxy" #dummy, replace in group_vars/all.yml

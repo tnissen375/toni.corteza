@@ -50,7 +50,7 @@
         role: corteza,
         existing_certs: 'false',
         corteza_dev_enable: false,
-        auth_bypass: false,
+        enable_provision: true,
         deploy_name: "corteza",
         include_auth: true,
         create_stack_network: true,

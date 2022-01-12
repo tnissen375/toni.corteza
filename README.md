@@ -97,17 +97,17 @@ Change the <inventories> path in the examples accordingly to your ansible instal
 Example with token from toni.dns role:
 ```bash
 ansible-playbook ./install.yml -i <inventories> --vault-id dns@vault --vault-password-file ../toni.dns/vault --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=one
-corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-one.git corteza_app_version=2021.3.x host_ssh_port=2226 nginx_stack_keep_alive=true dns_create=true corteza_app_enable=true"
+corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-one.git corteza_app_version=2021.9.x host_ssh_port=2226 nginx_stack_keep_alive=true dns_create=true corteza_app_enable=true"
 ```
 
 Example with already (manual) setup dns records (apps: compose, admin and one), chosse different `host_ssh_port` for each app.
 ```bash
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/tnissen375/corteza-webapp-compose.git corteza_app_version=2021.3.x host_ssh_port=2224 nginx_stack_keep_alive=true corteza_app_enable=true"
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-compose.git corteza_app_version=2021.9.x host_ssh_port=2224 nginx_stack_keep_alive=true corteza_app_enable=true"
 
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=admin corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-admin.git corteza_app_version=2021.3.x host_ssh_port=2225 nginx_stack_keep_alive=true corteza_app_enable=true"
+ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=admin corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-admin.git corteza_app_version=2021.9.x host_ssh_port=2225 nginx_stack_keep_alive=true corteza_app_enable=true"
 
 ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=workflow
-corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-workflow.git corteza_app_version=2021.3.x host_ssh_port=2227 nginx_stack_keep_alive=true corteza_app_enable=true"
+corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-workflow.git corteza_app_version=2021.9.x host_ssh_port=2227 nginx_stack_keep_alive=true corteza_app_enable=true"
 ```
 
 You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
@@ -275,7 +275,7 @@ ansible localhost -m debug -a var="keycloak_smtp_password" -i <inventories> --va
 
 ## Debug with VS Code
 
-The whole installtion is done on a single node swarm. By now the source code is checked out to and the host mounted to the docker dev container(s). You can install as many parallel versions as you like. (limited by server ressources). The versions are seperated and no ressources are shared, except service for generating PDFs.
+The whole installation is done on a single node swarm. By now the source code is checked out to and the host mounted to the docker dev container(s). You can install as many parallel versions as you like. (limited by server ressources). The versions are seperated and no ressources are shared, except service for generating PDFs.
 All containers are connected to the same network. The developement containers are accessable by SSH (only by private key). Install your public SSH-Key to the host and you will be able to access the development container as well. (Port 2223,...)
 
 ### Core / Go
