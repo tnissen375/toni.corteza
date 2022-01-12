@@ -102,35 +102,6 @@
     name: toni.openresty
     tasks_from: logs
 
-# - name: Register image file
-#   stat:
-#     path: "{{ user_path }}/{{ image_file_sshd }}"
-#   register: image_file
-#   tags: [ never, dev]
-
-# - name: remove images
-#   when: force_images|default(false)
-#   docker_image:
-#     name: "{{ image_sshd }}"
-#     force_absent: yes
-#     state: absent    
-#   tags: [ never, dev]
-
-# - name: copy tarball to host
-#   when: not image_file.stat.exists or force_images|default(false)
-#   copy:
-#     src: "/{{ user }}/{{ image_file_sshd }}"
-#     dest: "{{ user_path }}/{{ image_file_sshd }}"
-#   tags: [ never, dev]
-
-# - name: load container from tarball
-#   docker_image:
-#     name: "{{ image_sshd }}"
-#     load_path: "{{ user_path }}/{{ image_file_sshd }}"
-#     state: present
-#     source: load
-#   tags: [ never, dev]
-
 - name: Register image file
   stat:
     path: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
@@ -300,33 +271,52 @@
   register: result_reload
   when: nginx_stack_keep_alive|bool == true
 
-- name: Sleep for 180 seconds and continue with play // dev init needs container restart
-  wait_for:
-    timeout: 180
-  #tags: [ never, dev] // sink route needs started container as well
-  delegate_to: localhost
+#- debug: var="{{ deploy_name }}_{{ deploy_name }}"
+
+- name: wait for healthy Container
+  shell: docker service ps -q -f desired-state=running "{{ deploy_name }}_{{ deploy_name }}" | xargs docker inspect --format \{\{.Status.ContainerStatus.ContainerID\}\} | xargs docker inspect --format \{\{.State.Health.Status\}\}
+  register: result
+  ignore_errors: true # result.rc=123 if service not known
+  until: result.rc==0 and result.stdout == "healthy"
+  retries: 18
+  delay: 10  
+  #tags: [ never, app]
+  #when: "'dev' not in ansible_run_tags"
+
+- name: Start corteza api
+  command: make corteza cmd=serve-api
+  args:
+    chdir: "{{ user_path }}/{{ deploy_name }}"
+  register: result_api
+  tags: [ never, dev]
+
+# - name: Sleep for 180 seconds and continue with play // dev init needs container restart
+#   wait_for:
+#     timeout: 180
+#   tags: [ never, dev] # dev needs startup script... so healthy can be tracked -> workaround
+#   delegate_to: localhost
 
 - name: Delete sink if exist
   file:
     state: absent
     path: "{{ user_path }}/{{ deploy_name }}/sink"
-  when: corteza_sink_setup | bool == true
+  when: enable_sink | bool == true
 
 - name: generate sink route
   command: make sink #-B
   args:
     chdir: "{{ user_path }}/{{ deploy_name }}"
   register: result
-  when: corteza_sink_setup | bool == true
+  when: enable_sink | bool == true
  
 - set_fact:
     sink{{ deploy_name }}: "{{ item.split('=')[1] }}"
-  when: "corteza_sink_setup|bool == true and item.split('=')[0] == '/system/sink?__sign' and result.rc == 0"
+  when: "enable_sink|bool == true and item.split('=')[0] == '/system/sink?__sign' and result.rc == 0"
   ignore_errors: true
   with_items: "{{ result.stderr_lines }}"
 
 - copy: content="{{ vars['sink' + deploy_name ] }}" dest={{ user_path }}/{{ deploy_name }}/sink
-  when: corteza_sink_setup | bool == true
+  when: enable_sink | bool == true
   ignore_errors: true
 
 - name: create backup daily backup by cron file under /etc/cron.d
