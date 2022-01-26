@@ -179,3 +179,12 @@
     chdir: "{{ user_path }}/{{ nginx_stack }}"
   register: result_reload
   when: nginx_stack_keep_alive|bool == true
+
+- name: create backup daily backup by cron file under /etc/cron.d
+  when: enable_backup | bool==true
+  cron:
+    name: Create {{ deploy_name }} backup
+    minute: "0"
+    hour: "4"
+    user: root
+    job: "make -C {{ user_path }}/{{ deploy_name }} completebackup"  

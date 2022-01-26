@@ -62,7 +62,6 @@
     force: yes
   tags: [ never, app]  
 
-# todo: Websockets need a closer look, maybe some changes in nginx conf are needed
 - name: Replace host cause it does not work with docker swarm mode
   when: corteza_app_enable is defined and corteza_app_enable|bool==true
   replace:
@@ -322,8 +321,7 @@
 - name: create backup daily backup by cron file under /etc/cron.d
   when: enable_backup | bool==true
   cron:
-    name: Create backup
-    weekday: "0"
+    name: Create {{ deploy_name }} backup
     minute: "0"
     hour: "4"
     user: root

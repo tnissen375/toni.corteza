@@ -10,6 +10,7 @@ roles:
    src: git+https://github.com/tnissen375/toni.docker.git
  - name: toni.openresty
    src: git+https://github.com/tnissen375/toni.openresty.git
+   version: 9240652530180646f950f9adf33a8fab720d574e
  - name: toni.buildimages
    src: git+https://github.com/tnissen375/toni.buildimages.git
  - name: toni.base
@@ -18,4 +19,4 @@ roles:
    src: git+https://github.com/tnissen375/toni.dns.git
  - name: toni.keycloak
    src: git+https://github.com/tnissen375/toni.keycloak.git
-   version: b5b21139e1738baafa05d06049563d7999905812
+   version: 4c118417ea8b4487ed96f0e4d8c86ed62191df26

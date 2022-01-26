@@ -5,8 +5,14 @@ DB := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ deploy_name
 KANBAN := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ deploy_name }}_{{ deploy_name }}\.*")
 NGINX := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ nginx_stack }}_nginx-proxy\.*")
 
+completebackup: bckup stopapp bckupdb rm deploy purge
+hotbackup: bckup bckupdb purge
+
 rm:
 	docker stack rm {{ deploy_name }}
+
+stopapp:
+	docker stop $(KANBAN)
 
 deploy:
 	docker stack deploy -c docker-compose.yml {{ deploy_name }} && docker exec -it $(NGINX) nginx -s reload

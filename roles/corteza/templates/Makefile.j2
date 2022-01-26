@@ -15,7 +15,7 @@ BIN := /go/src/corteza-server/gin-bin
 
 {% if enable_corredor is defined and enable_corredor|bool==true %}
 completebackup: bckup stopapp bckupdb bckupansible bckupcorredor rm deploy purge
-hotbackup: bckup bckupdb bckupansible bckupcorredor rm deploy purge
+hotbackup: bckup bckupdb bckupansible bckupcorredor purge
 {% else %}
 completebackup: bckup stopapp bckupdb rm deploy purge
 hotbackup: bckup bckupdb rm deploy purge

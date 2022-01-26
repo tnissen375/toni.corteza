@@ -41,8 +41,6 @@
       }
     - {
         role: toni.keycloak, 
-        nginx_domain: "yd2m.com",
-        nginx_access_loglevel: "production", #openresty ip log anonymized
         auth_bypass: "true",
         tags: [ keycloak ]
       }

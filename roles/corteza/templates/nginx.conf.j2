@@ -80,6 +80,11 @@ server {
     add_header Content-Security-Policy "frame-ancestors *.{{ nginx_domain }}";
 {% endif %}
 
+ location /api/system/sink {
+  set $upstream {{ nginx_upstream }};
+  proxy_pass          $upstream;
+ }
+
 #https://stackoverflow.com/questions/32084604/why-is-keycloak-removing-the-ssl-in-the-redirect-uri
     #proxy_pass    http://backend_{{ nginx_subdomain | replace('.','') }};
     set $upstream {{ nginx_upstream }};
