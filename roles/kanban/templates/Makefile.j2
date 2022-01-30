@@ -45,4 +45,4 @@ restoredb:
 	gunzip -c $(file) | docker exec -i $(DB) sh -c 'exec pg_restore --clean --dbname=postgresql://"$$POSTGRES_USER":"$$POSTGRES_PASSWORD"@127.0.0.1:5432/{{ kanban_postgres_db }}'
 
 purge:
-	find {{ user_path }}/{{ deploy_name }}/backup/*.sql.gz  -mtime +10 -delete &> /dev/null && find {{ user_path }}/{{ deploy_name }}/data_*.gz  -mtime +10 -delete &> /dev/null
+	find {{ user_path }}/{{ deploy_name }}/backup/*.sql.gz  -mtime +10 -delete &> /dev/null && find {{ user_path }}/{{ deploy_name }}/backup/data_*.gz  -mtime +10 -delete &> /dev/null
