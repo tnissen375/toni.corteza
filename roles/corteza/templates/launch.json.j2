@@ -2,16 +2,34 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Attach to Process",
+            "type": "go",
+            "request": "attach",
+            "mode": "local",
+            "processId": 0,
+            "envFile": "${workspaceFolder}/.env",
+                        "showLog": true,
+                        "trace": "log",
+                        "logOutput": "rpc"
+        },
+        {
+            "name": "Launch file",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${file}"
+        },
+        {
             "name": "Debug running server",
             "apiVersion": 2,
             "type": "go",
             "request": "attach",
             "mode": "remote",
             "port": 42325,
-			"showLog": true,
-            "remotePath": "${workspaceFolder}",
-			"trace": "log",
-			"logOutput": "rpc"            
+            "envFile": "${workspaceFolder}/.env",
+                        "showLog": true,
+                        "trace": "log",
+                        "logOutput": "rpc"
         },
         {
             "name": "Debug go cli",
@@ -20,6 +38,15 @@
             "mode": "auto",
             "program": "${fileDirname}",
             "args": ["sink", "signature", "--method", "POST", "--content-type", "email"],
+            "envFile": "${workspaceFolder}/.env"
+        },
+        {
+            "name": "Debug Startup",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}",
+            "args": ["serve-api"],
             "envFile": "${workspaceFolder}/.env"
         }
     ]
