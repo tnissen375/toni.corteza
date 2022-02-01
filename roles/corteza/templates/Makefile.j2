@@ -82,6 +82,9 @@ bckupdb:
 restoredb:
 	gunzip -c $(file) | docker exec -i $(DB) sh -c 'exec mysql -u root -p"$$MYSQL_ROOT_PASSWORD" {{ corteza_mysql_db }}'
 
+logindb:
+	docker exec -it $(DB) sh -c 'exec mysql -uroot -p"$$MYSQL_ROOT_PASSWORD" corteza'
+
 purge:
 	find {{ user_path }}/{{ deploy_name }}/backup/*.gz  -mtime +10 -delete &> /dev/null
 
