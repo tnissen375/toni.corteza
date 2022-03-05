@@ -54,7 +54,7 @@ logdb:
 	docker service logs -f $(DB) --tail ${TAIL}
 
 exec:
-	docker exec -it $(CORTEZA) /bin/sh
+	docker exec -it $(CORTEZA) /bin/bash
 
 execdb:
 	docker exec -it $(DB) /bin/bash
@@ -83,7 +83,7 @@ restoredb:
 	gunzip -c $(file) | docker exec -i $(DB) sh -c 'exec mysql -u root -p"$$MYSQL_ROOT_PASSWORD" {{ corteza_mysql_db }}'
 
 logindb:
-	docker exec -it $(DB) sh -c 'exec mysql -uroot -p"$$MYSQL_ROOT_PASSWORD" corteza'
+	docker exec -it $(DB) sh -c 'exec mysql -uroot -p"$$MYSQL_ROOT_PASSWORD" {{ corteza_mysql_db }}'
 
 purge:
 	find {{ user_path }}/{{ deploy_name }}/backup/*.gz  -mtime +10 -delete &> /dev/null

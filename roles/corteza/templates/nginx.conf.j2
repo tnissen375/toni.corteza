@@ -64,9 +64,14 @@ server {
 
 {% if enable_provision is defined and enable_provision|bool==true and enable_autologin is defined and enable_autologin|bool==true %}
  location /auth/login {
-   return 301 https://corteza.{{ nginx_domain }}/auth/external/openid-connect.Nginx;
+   return 301 https://{{ nginx_subdomain }}.{{ nginx_domain }}/auth/external/openid-connect.Nginx;
  }
 {% endif %}
+
+ location /api/system/sink {
+  set $upstream {{ nginx_upstream }};
+  proxy_pass          $upstream;
+ }
 
  location / {
 {% if include_auth is defined and include_auth|bool==true %}
@@ -79,11 +84,6 @@ server {
     proxy_hide_header Content-Security-Policy;
     add_header Content-Security-Policy "frame-ancestors *.{{ nginx_domain }}";
 {% endif %}
-
- location /api/system/sink {
-  set $upstream {{ nginx_upstream }};
-  proxy_pass          $upstream;
- }
 
 #https://stackoverflow.com/questions/32084604/why-is-keycloak-removing-the-ssl-in-the-redirect-uri
     #proxy_pass    http://backend_{{ nginx_subdomain | replace('.','') }};

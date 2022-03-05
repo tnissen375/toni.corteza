@@ -10,7 +10,7 @@ roles:
    src: git+https://github.com/tnissen375/toni.docker.git
  - name: toni.openresty
    src: git+https://github.com/tnissen375/toni.openresty.git
-   version: 9240652530180646f950f9adf33a8fab720d574e
+   version: 27524526774c43fb8e29a1719581a1f31cf8f933
  - name: toni.buildimages
    src: git+https://github.com/tnissen375/toni.buildimages.git
  - name: toni.base
