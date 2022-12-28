@@ -2,8 +2,10 @@
 user: "root"
 user_path: "/root"
 deploy_name: "corteza"
+srcpath: "{{ user_path }}/{{ deploy_name }}/src"
 nginx_domain: ""
 nginx_subdomain: "{{ deploy_name }}."
+allow_domain: "dev.{{ domain }}"
 enable_ipv6: false # not needed for corteza but if you wanna reach server on ipv6 p.e. keycloak on ipv6 only
 enable_backup: false
 enable_provision: false
@@ -12,9 +14,13 @@ enable_corredor: false
 enable_sink: false
 auth_proxy: false
 auth_proxy_client: "Nginx"
+keycloak_auth: true
+keycloak_deploy_name: "key"
 keycloak_realm: "Intern" # the realm which nginx is using in keycloak
 keycloak_client_name: "Nginx" # client name in keycloak
 keycloak_client_secret: "d3367b2d-85fb-46c0-9fcb-15e2dfeb4d9b" # dummy -> allways change!!
+keycloak_root_url: "corteza.{{ domain }}"
+
 dns_create: false
 dns_update: false
 nginx_stack: "openresty"
@@ -28,14 +34,11 @@ stack_subnet: "10.10.15.0/24"
 nginx_upstream: "http://{{ deploy_name }}:80"
 external_domain: "{{ nginx_subdomain }}{{ nginx_domain }}"
 corteza_webapp_enable: "true"
-#keycloak_domain: ""
-#keycloak_realm: ""
-#keycloak_secret: ""
 include_auth: "false"
 include_xframe: "false" #Nextcloud with Only Office in corteza dashboard
 access_group: "corteza"
 corteza_mysql_image: "percona:8.0"
-corteza_image_version: "2021.9.6"
+corteza_image_version: "2022.9.4"
 corteza_image: "cortezaproject/corteza:{{ corteza_image_version }}"
 corredor_image: "cortezaproject/corteza-server-corredor:{{ corteza_image_version }}"
 #corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"
@@ -47,26 +50,34 @@ corteza_mysql_root_password: "pDsQ2Ahh4W2ojDb4vGeh05n" #dummy, replace in group_
 corteza_mysql_password: "pDsQsg62AW2ojDb4vGeh05nxy" #dummy, replace in group_vars/all.yml
 corteza_dev_enable: "false"
 corteza_dev_base_url: "dev.{{ nginx_domain }}"
-corteza_dev_repository: "https://github.com/tnissen375/corteza-server.git"
+corteza_dev_repository: "https://github.com/tnissen375/corteza.git"
 corteza_dev_version: "{{ corteza_image_version }}"
-corteza_app_enable: "false"
-corteza_app_repository: "https://github.com/tnissen375/corteza-webapp-compose.git"
-corteza_app_version: "{{ corteza_image_version }}"
-#go_dev_image: "deis/go-dev"
-#go_dev_image_tag: "v1.32.2"
-#image_sshd: "registry.{{ domain }}/sshd:3.14"
-#image_file_sshd: "registry.{{ domain }}_sshd:3.14.tar"
-host_ssh_port: 2223
-image_go_dev_tag: "v1.32.2"
-image_go_dev_ssh: "registry.{{ domain }}/go_dev_ssh:{{ image_go_dev_tag }}"
-image_file_go_dev_ssh: "registry.{{ domain }}_go_dev_ssh:{{ image_go_dev_tag }}.tar"
-image_node_ssh_tag: "14"
-image_node_ssh: "registry.{{ domain }}/node_ssh:{{ image_node_ssh_tag }}"
-image_file_node_ssh: "registry.{{ domain }}_node_ssh:{{ image_node_ssh_tag }}.tar"
+host_ssh_port: 2223 #dev server (go)
+build_local: false
+image_go_dev_tag: "v1.36.1"
+image_go_dev_ssh: "truespirit/go_dev_ssh:{{ image_go_dev_tag }}"
+image_node_ssh_tag: "14.21.2-buster"
+image_node_ssh: "truespirit/node_ssh:{{ image_node_ssh_tag }}"
+#image_go_dev_ssh: "registry.{{ domain }}/go_dev_ssh:{{ image_go_dev_tag }}"
+#image_file_go_dev_ssh: "registry.{{ domain }}_go_dev_ssh:{{ image_go_dev_tag }}.tar"
+#image_node_ssh_tag: "14"
+#image_node_ssh: "registry.{{ domain }}/node_ssh:{{ image_node_ssh_tag }}"
+#image_file_node_ssh: "registry.{{ domain }}_node_ssh:{{ image_node_ssh_tag }}.tar"
 
 nginx_conf_dir: "/etc/nginx"
 container_cert_path: "/etc/ssl/dummy-ssl-fallback.crt"
 container_key_path: "/etc/ssl/dummy-ssl-fallback.key"
+
+create_kc_role: false
+create_kc_client: false
+create_kc_user: false
+keycloak_roles:
+  - "corteza"
+  - "corteza_admin"
+## only lowercase usernames!!!!
+keycloak_users:
+  - { username: "ace", email: "ace@{{domain}}", firstname: "A", lastname: "ce" }
+keycloak_temporary_pass: "ace123"
 
 dir_exists:
   - "/etc/nginx/conf.d"

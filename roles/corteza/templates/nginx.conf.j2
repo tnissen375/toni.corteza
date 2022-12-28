@@ -18,11 +18,15 @@ server {
   listen 443 ssl http2;
   listen [::]:443 ssl http2;
   include snippets/ssl.conf;
+  include snippets/proxy.conf;
 
   add_header x-frame-options "SAMEORIGIN" always;
 # does not work due to photoswipe violating inline-script
 #  add_header Content-Security-Policy "default-src 'self' *.{{ domain }}";
   add_header X-XSS-Protection "1; mode=block" always;
+
+  proxy_hide_header Access-Control-Allow-Origin;
+  add_header 'Access-Control-Allow-Origin' $allow_origin;
 
 {% if existing_certs is defined and existing_certs|bool==true %}
   ssl_certificate {{ ssl_certs_path }}/{{ nginx_domain }}.crt;
@@ -56,6 +60,7 @@ server {
   }
 {% endif %}
 
+{% if keycloak_auth is defined and keycloak_auth|bool==true%}
 {% if auth_proxy is defined and auth_proxy|bool==true %}
  location /auth/login {
    return 301 https://$host/auth/external/openid-connect.{{ auth_proxy_client }};
@@ -64,14 +69,43 @@ server {
 
 {% if enable_provision is defined and enable_provision|bool==true and enable_autologin is defined and enable_autologin|bool==true %}
  location /auth/login {
-   return 301 https://{{ nginx_subdomain }}.{{ nginx_domain }}/auth/external/openid-connect.Nginx;
+   return 301 https://{{ nginx_subdomain }}{{ nginx_domain }}/auth/external/openid-connect.{{ keycloak_client_name }};
  }
 {% endif %}
+{% endif %}
 
+{% if item.app is undefined or item.app==""%}
  location /api/system/sink {
   set $upstream {{ nginx_upstream }};
   proxy_pass          $upstream;
  }
+{% endif %}
+
+{% if item.app is defined and item.app=="one"%}
+   location /admin {
+        return 301 https://admin.yd2m.com;
+   }
+
+    location /compose {
+        return 301 https://compose.yd2m.com;
+    }
+
+    location /workflow {
+        return 301 https://workflow.yd2m.com;
+    }
+
+    location /reporter {
+        return 301 https://reporter.yd2m.com;
+    }
+
+    location /discovery {
+        return 301 https://discovery.yd2m.com;
+    }
+
+    location /privacy {
+        return 301 https://privacy.yd2m.com;
+    }
+{% endif %}
 
  location / {
 {% if include_auth is defined and include_auth|bool==true %}

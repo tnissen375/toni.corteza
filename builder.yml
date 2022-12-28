@@ -4,6 +4,7 @@
   gather_facts: yes
   roles:
     - {
-        role : toni.buildimages
+        role : toni.buildimages,
+        nginx_domain: yd2m.com
       }
   

@@ -6,7 +6,7 @@
     include_role: { name: toni.buildimages, tasks_from: copy }
   vars:
     include_image_files:
-        image: "registry.hyconcept.de_ansible_corredor:2.10-infra-0.39"
+        image: "{{ corredor_image }}"
   tags: [ copyimage ]
 
 # Renew cert

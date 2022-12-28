@@ -1,0 +1,58 @@
+---
+- name: Remove line
+  lineinfile:
+    regexp: 'host:'
+    path: "{{ srcpath }}/client/web/{{ item.app }}/vue.config-builder.js"
+    state: absent
+
+- name: Insert devserver block
+  blockinfile:
+    path: "{{ srcpath }}/client/web/{{ item.app }}/vue.config-builder.js"
+    insertafter: '^\s*devServer:'
+    block: |
+      host: '0.0.0.0',
+      public: '{{ item.app }}.yd2m.com',
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+      },
+    marker: "// {mark} ANSIBLE MANAGED"
+
+## app configs
+- name: Deploy config app file
+  template:
+    src: config.js.j2
+    dest: "{{ srcpath }}/client/web/{{ item.app }}/public/config.js"
+
+- name: Deploy compose app file
+  template:
+    src: docker-compose-app.yml.j2
+    dest: "{{ user_path }}/{{ deploy_name }}/docker-compose-{{ item.app }}.yml"
+
+- name: Deploy config app file
+  template:
+    src: healthcheck.js.j2
+    dest: "{{ srcpath }}/client/web/{{ item.app }}/healthcheck.js"
+
+- name: subdomain
+  when: not existing_certs|bool
+  include_tasks: subdomain.yml
+  vars:
+    nginx_subdomain: "{{ item.app }}."
+    nginx_upstream: "http://{{ deploy_name }}_{{ item.app }}:80"
+    include_auth: "false"
+    
+- name: remove {{ item.app }} stack
+  docker_stack:
+    state: absent
+    prune: yes
+    name: "{{ deploy_name }}_{{ item.app }}"
+    compose:
+      - "{{ user_path }}/{{ deploy_name }}/docker-compose-{{ item.app }}.yml"
+
+- name: restart {{ item.app }} stack
+  docker_stack:
+    state: present
+    prune: yes
+    name: "{{ deploy_name }}_{{ item.app }}"
+    compose:
+      - "{{ user_path }}/{{ deploy_name }}/docker-compose-{{ item.app }}.yml"

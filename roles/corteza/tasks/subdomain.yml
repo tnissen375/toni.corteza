@@ -1,0 +1,74 @@
+---
+- name: Register nginx.conf file
+  stat:
+    path: "{{ nginx_conf_dir }}/nginx.conf"
+  register: nginx_conf_file  
+
+- name: Deploy vhost
+  template:
+    src: "nginx.conf.j2"
+    dest: "{{ nginx_conf_dir }}/conf.d/{{ nginx_subdomain }}{{ nginx_domain }}.conf"
+  vars:
+    enable_provision: false
+    auth_proxy: false
+  when: nginx_conf_file.stat.exists
+
+# - name: Configure nginx logs
+#   when: nginx_conf_file.stat.exists
+#   include_role:
+#     name: toni.openresty
+#     tasks_from: logs
+#   vars:
+#     nginx_logfiles:
+#       - { conffile: "{{ nginx_conf_dir }}/conf.d/{{ nginx_subdomain }}{{ nginx_domain }}.conf", logdir: "/usr/local/openresty/nginx/logs" }  
+
+- name: Copy snippets
+  include_role:
+    name: toni.openresty
+    tasks_from: snippets
+  vars:
+    keycloak_access_group: "{{ access_group }}"
+    keycloak_redirect: "{{ nginx_subdomain }}{{ nginx_domain }}"
+    nginx_snippets:
+      - { srcname: "auth.conf.j2", destname: "{{ access_group }}_auth.conf" }
+
+- name: restart nginx stack
+  when: nginx_run_as is defined and nginx_run_as=="stack" #and nginx_stack_keep_alive|bool == false
+  docker_stack:
+    state: absent
+    name: "{{ nginx_stack }}"
+    compose:
+      - "{{ user_path }}/{{ nginx_stack }}/docker-compose.yml" 
+
+- name: restart nginx stack
+  when: nginx_run_as is defined and nginx_run_as=="stack" #and nginx_stack_keep_alive|bool == false
+  docker_stack:
+    state: present
+    prune: yes
+    name: "{{ nginx_stack }}"
+    compose:
+      - "{{ user_path }}/{{ nginx_stack }}/docker-compose.yml" 
+      
+# - name: reload nginx stack
+#   command: make reload
+#   args:
+#     chdir: "{{ user_path }}/{{ nginx_stack }}"
+#   register: result_reload
+#   when: nginx_stack_keep_alive|bool == true
+
+- name: set cert facts 
+  include_role:
+    name: toni.certificates
+    tasks_from: certbot_facts
+  vars:
+    certbot_server: "{{ nginx_subdomain }}{{ nginx_domain }}"
+    record_dns_create: "{{ dns_create }}"
+    record_dns_update: "{{ dns_update }}"  
+
+- name: Deploy vhost
+  template:
+    src: "nginx.conf.j2"
+    dest: "{{ nginx_conf_dir }}/conf.d/{{ nginx_subdomain }}{{ nginx_domain }}.conf"
+  vars:
+    enable_provision: false
+    auth_proxy: false

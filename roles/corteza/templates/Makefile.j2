@@ -10,21 +10,32 @@ NGINX := $$(docker ps -a | grep "Up" | awk '{print $$NF}' | grep -w "{{ nginx_st
 {% if corteza_dev_enable is defined and corteza_dev_enable|bool==false %}
 BIN := corteza-server
 {% else %}
-BIN := /go/src/corteza-server/gin-bin
+BIN := /go/src/corteza-server/server/build/gin-bin
 {% endif %}
 
 {% if enable_corredor is defined and enable_corredor|bool==true %}
-completebackup: bckup stopapp bckupdb bckupansible bckupcorredor rm deploy purge
+completebackup: bckup stopcorteza bckupdb bckupansible bckupcorredor rm deploy purge
 hotbackup: bckup bckupdb bckupansible bckupcorredor purge
 {% else %}
-completebackup: bckup stopapp bckupdb rm deploy purge
+completebackup: bckup stopcorteza bckupdb rm deploy purge
 hotbackup: bckup bckupdb rm deploy purge
 {% endif %}
+
+.PHONY: rm rmapp rmapps deployapp stopcorteza deploy sinkhelp sink debugdev ps log logdb exec execdb corteza bckup bckupansible bckupcorredor restorecorredor restore bckupdb restoredb logindb purge appmake servermake serverbin vendor realize
 
 rm:
 	docker stack rm {{ deploy_name }}
 
-stopapp:
+rmapp:
+	docker stack rm $(name)
+
+rmapps:
+	docker stack rm $(docker stack ls | grep dev | awk '{print $1}')
+
+deployapp:
+	docker stack deploy -c docker-compose-$(name).yml $(name) && docker exec -it $(NGINX) nginx -s reload
+
+stopcorteza:
 	docker stop $(CORTEZA)
 
 deploy:
@@ -88,13 +99,17 @@ logindb:
 purge:
 	find {{ user_path }}/{{ deploy_name }}/backup/*.gz  -mtime +10 -delete &> /dev/null
 
-{% if corteza_dev_enable is defined and corteza_dev_enable|bool==true %}
-apps:
-	docker exec $(CORTEZA) sh -c 'exec make --directory=/go/src/corteza-server/webapp'
+appmake:
+	docker exec $(CORTEZA) sh -c 'exec make --directory=/go/src/corteza-server/server/webapp $(cmd)'
+
+servermake:
+	docker exec $(CORTEZA) sh -c 'exec make --directory=/go/src/corteza-server/server $(cmd)'
+
+serverbin:
+	docker exec $(CORTEZA) $(BIN) $(CMD)
 
 vendor:
 	docker exec $(CORTEZA) sh -c 'exec go mod vendor'
 
 realize:
 	docker exec $(CORTEZA) sh -c 'exec make realize'
-{% endif %}

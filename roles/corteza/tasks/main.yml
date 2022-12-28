@@ -2,7 +2,7 @@
 - name: Register nginx.conf file
   stat:
     path: "{{ nginx_conf_dir }}/nginx.conf"
-  register: nginx_conf_file  
+  register: nginx_conf_file
 
 - file:
     state: directory
@@ -15,7 +15,6 @@
   template:
     src: ".env.j2"
     dest: "{{ user_path }}/{{ deploy_name }}/.env"
-  tags: [ never, dev]
   when: nginx_conf_file.stat.exists
 
 - name: Deploy vscode debug conf
@@ -33,7 +32,7 @@
     sysctl_set: yes
     state: present
     reload: yes
-  tags: [ never, dev]    
+  tags: [ never, dev]
 
 # - name: Deploy backup script
 #   template:
@@ -49,25 +48,10 @@
 - name: Git checkout corteza code
   git:
     repo: "{{ corteza_dev_repository }}"
-    dest: "{{ user_path }}/{{ deploy_name }}/src"
+    dest: "{{ srcpath }}"
     version: "{{ corteza_dev_version }}"
     force: yes
   tags: [ never, dev]
-
-- name: Git checkout corteza app
-  git:
-    repo: "{{ corteza_app_repository }}"
-    dest: "{{ user_path }}/{{ deploy_name }}/src/"
-    version: "{{ corteza_app_version }}"
-    force: yes
-  tags: [ never, app]  
-
-- name: Replace host cause it does not work with docker swarm mode
-  when: corteza_app_enable is defined and corteza_app_enable|bool==true
-  replace:
-    path: "{{ user_path }}/{{ deploy_name }}/src/vue.config-builder.js"
-    regexp: '127.0.0.1'
-    replace: "0.0.0.0"
 
 - name: Create network
   include_role:
@@ -85,12 +69,12 @@
     src: nginx.conf.j2
     dest: "{{ nginx_conf_dir }}/conf.d/{{ external_domain }}.conf"
   when: nginx_conf_file.stat.exists
-  
+
 - name: Copy snippets
   include_role:
     name: toni.openresty
     tasks_from: snippets
-  vars:  
+  vars:
     keycloak_access_group: "{{ access_group }}"
     nginx_snippets:
       - { srcname: "auth.conf.j2", destname: "{{ access_group }}_auth.conf" }
@@ -102,27 +86,29 @@
     tasks_from: logs
 
 - name: Register image file
+  when: build_local|bool == true
   stat:
     path: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
   register: image_file
   tags: [ never, dev]
 
 - name: remove images
-  when: force_images|default(false)
+  when: force_images|default(false) and build_local|bool == true
   docker_image:
     name: "{{ image_go_dev_ssh }}"
     force_absent: yes
-    state: absent    
+    state: absent
   tags: [ never, dev]
 
 - name: copy tarball to host
-  when: not image_file.stat.exists or force_images|default(false)
+  when: build_local|bool == true and not image_file.stat.exists or force_images|default(false)
   copy:
     src: "/{{ user }}/{{ image_file_go_dev_ssh }}"
     dest: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
   tags: [ never, dev]
 
 - name: load container from tarball
+  when: build_local|bool == true
   docker_image:
     name: "{{ image_go_dev_ssh }}"
     load_path: "{{ user_path }}/{{ image_file_go_dev_ssh }}"
@@ -131,27 +117,29 @@
   tags: [ never, dev]
 
 - name: Register image file
+  when: build_local|bool == true
   stat:
     path: "{{ user_path }}/{{ image_file_node_ssh }}"
   register: image_file
   tags: [ never, app]
 
 - name: remove images
-  when: force_images|default(false)
+  when: build_local|bool == true and force_images|default(false)
   docker_image:
     name: "{{ image_node_ssh }}"
     force_absent: yes
-    state: absent    
+    state: absent
   tags: [ never, app]
 
 - name: copy tarball to host
-  when: not image_file.stat.exists or force_images|default(false)
+  when: build_local|bool == true and not image_file.stat.exists or force_images|default(false)
   copy:
     src: "/{{ user }}/{{ image_file_node_ssh }}"
     dest: "{{ user_path }}/{{ image_file_node_ssh }}"
   tags: [ never, app]
 
 - name: load container from tarball
+  when: build_local|bool == true
   docker_image:
     name: "{{ image_node_ssh }}"
     load_path: "{{ user_path }}/{{ image_file_node_ssh }}"
@@ -183,7 +171,7 @@
   register: result_reload
   when: nginx_stack_keep_alive|bool == true
 
-- name: set cert facts 
+- name: set cert facts
   include_role:
     name: toni.certificates
     tasks_from: certbot_facts
@@ -198,7 +186,7 @@
   template:
     src: nginx.conf.j2
     dest: "{{ nginx_conf_dir }}/conf.d/{{ external_domain }}.conf"
-  
+
 - name: stop nginx stack
   when: nginx_stack_keep_alive|bool == false
   docker_stack:
@@ -222,30 +210,11 @@
     chdir: "{{ user_path }}/{{ nginx_stack }}"
   register: result_reload
   when: nginx_stack_keep_alive|bool == true
-  
+
 - name: Deploy compose file
-  when: corteza_app_enable is defined and corteza_app_enable|bool==false
   template:
     src: docker-compose.yml.j2
     dest: "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
-
-- name: Deploy compose app file
-  when: corteza_app_enable is defined and corteza_app_enable|bool==true
-  template:
-    src: docker-compose-app.yml.j2
-    dest: "{{ user_path }}/{{ deploy_name }}/docker-compose.yml"
-
-- name: Deploy config app file
-  when: corteza_app_enable is defined and corteza_app_enable|bool==true
-  template:
-    src: config.js.j2
-    dest: "{{ user_path }}/{{ deploy_name }}/src/public/config.js"
-
-- name: Deploy config app file
-  when: corteza_app_enable is defined and corteza_app_enable|bool==true
-  template:
-    src: healthcheck.js.j2
-    dest: "{{ user_path }}/{{ deploy_name }}/src/healthcheck.js"
 
 - name: restart {{ deploy_name }} stack
   docker_stack:
@@ -270,24 +239,100 @@
   register: result_reload
   when: nginx_stack_keep_alive|bool == true
 
-#- debug: var="{{ deploy_name }}_{{ deploy_name }}"
+- name: change app start configs 
+  when: corteza_webapp_enable|bool == false
+  include_tasks: dev.yml
+  tags: [ never, dev]
+  loop:
+    - { app: "admin", port: "2400" }
+    - { app: "one", port: "2401" }
+    - { app: "compose", port: "2402" }
+    - { app: "discovery", port: "2403" }
+    - { app: "privacy", port: "2404" }
+    - { app: "reporter", port: "2405" }
+    - { app: "workflow", port: "2406" }
 
+- name: Create Keycloak client
+  include_role:
+    name: toni.keycloak
+    tasks_from: client
+  vars:
+    keycloak_role_name: "corteza"
+  when: create_kc_client|default(false)
+
+- name: Create Keycloak client role(s)
+  include_role:
+    name: toni.keycloak
+    tasks_from: role
+  vars:
+    keycloak_role_name: "{{ item }}"
+  when: create_kc_role|default(false)
+  loop:
+    "{{ keycloak_roles }}"
+
+- name: Create Keycloak user(s)
+  include_role:
+    name: toni.keycloak
+    tasks_from: user
+  vars:
+    kcu: "{{ kc_userdata }}"
+  when: create_kc_user|default(false)
+  loop:
+    "{{ keycloak_users }}"
+  loop_control:
+    loop_var: kc_userdata
+
+- name: Add role to user
+  include_role:
+    name: toni.keycloak
+    tasks_from: clientrole
+  vars:
+    keycloak_username: "{{ kc_userdata.username }}"
+    keycloak_role: 'corteza'
+  when: create_kc_user|default(false)
+  loop:
+    "{{ keycloak_users }}"
+  loop_control:
+    loop_var: kc_userdata
+
+#openresty temp hack
+- name: Create Keycloak client role(s)
+  include_role:
+    name: toni.keycloak
+    tasks_from: role
+  vars:
+    keycloak_role_name: "{{ item }}"
+    ow_keycloak_client_name: "Nginx"
+  when: create_kc_role|default(false)
+  loop:
+    "{{ keycloak_roles }}"
+
+- name: Add role to user
+  include_role:
+    name: toni.keycloak
+    tasks_from: clientrole
+  vars:
+    keycloak_username: "ace"
+    ow_keycloak_client_name: "Nginx"
+    keycloak_role: "corteza"
+
+#- debug: var="{{ deploy_name }}_{{ deploy_name }}"
 - name: wait for healthy Container
   shell: docker service ps -q -f desired-state=running "{{ deploy_name }}_{{ deploy_name }}" | xargs docker inspect --format \{\{.Status.ContainerStatus.ContainerID\}\} | xargs docker inspect --format \{\{.State.Health.Status\}\}
   register: result
   ignore_errors: true # result.rc=123 if service not known
   until: result.rc==0 and result.stdout == "healthy"
   retries: 18
-  delay: 10  
+  delay: 10
   #tags: [ never, app]
   #when: "'dev' not in ansible_run_tags"
 
-- name: Start corteza api
-  command: make corteza cmd=serve-api
-  args:
-    chdir: "{{ user_path }}/{{ deploy_name }}"
-  register: result_api
-  tags: [ never, dev]
+# - name: Start corteza api
+#   command: make corteza cmd=serve-api
+#   args:
+#     chdir: "{{ user_path }}/{{ deploy_name }}"
+#   register: result_api
+#   tags: [ never, dev]
 
 # - name: Sleep for 180 seconds and continue with play // dev init needs container restart
 #   wait_for:
@@ -307,7 +352,7 @@
     chdir: "{{ user_path }}/{{ deploy_name }}"
   register: result
   when: enable_sink | bool == true
- 
+
 - set_fact:
     sink{{ deploy_name }}: "{{ item.split('=')[1] }}"
   when: "enable_sink|bool == true and item.split('=')[0] == '/system/sink?__sign' and result.rc == 0"

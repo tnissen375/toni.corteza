@@ -1,0 +1,24 @@
+## for reference - not ready yet due path probs in vscode / ssh 
+
+# add to launch.json : "preLaunchTask": "Run Delve on target",
+##remove comments && copy file to .vscode
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            // has to match with the contents of preLaunchTask in launch.json
+            "label": "Run Delve on target",
+            "type": "shell",
+            // runs Taskfile with our script
+            "command": "dlv attach -l 127.0.0.1:42325 --headless --log=true --accept-multiclient --api-version=2 $(pgrep gin-bin)",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                // hides the terminal with repetitive build output
+                "reveal": "silent"
+            }
+        }
+    ]
+}

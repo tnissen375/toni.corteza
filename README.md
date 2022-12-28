@@ -1,126 +1,109 @@
 # toni.corteza
-Ansible role to setup corteza low code plattform with or without a seperated developement version(s) on subdomain(s). Its developement deployment is capable of debugging with VS Code (go core & node apps). Even if it is possible by now the documentation on debugging is still short right now. To be extended ;)
+Update to work with 2023.3.0-dev.1 (This role is not backwards compatible: works with 2022.9.4 and above)
 
-The roles which are used to install corteza are not made for this purpose only. I m using these roles as a universal base for installing a lot of different applications, normally behind an authenticating reverse proxy (openresty/nginx). By now i havent integrated keycloak in the corteza stack but its on my roadmap.
-So some variable may be unexpected but thats ok (at least for me) and maybe will make sense to you after i extend this role.
+Ansible role to setup corteza low code plattform behind keycloak and openresty authenticating proxy. (all SSL certs created)
+Dev setup available, set up on seperated subdomains.
+The developement deployment is capable of debugging with VS Code (go core & node apps). Even if it is possible the documentation on debugging is still short right now. To be extended ;)
+
+The roles which are used to install corteza are not made for this purpose only. I m using these roles as a universal base for installing a lot of different applications, normally behind an authenticating reverse proxy (openresty/nginx). This ansible role is capable of installing keycloak, creating keycloak configs and activate Oauth in Corteza (or dev).
+Some variable may be unexpected but thats ok (for me) and maybe not all vars beside described standard conf work for you.
 
 ### Domain / Subdomain
 
-You have to make sure that your domain is pointing to your server. For my tests i use  `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later. If you are using a Server @ Hetzner **or** Amazon Route 53 DNS** (**to be implemented) you dont have to worry about the setup. This role will take care of creating DNS entries.
-For any other dns provider you will have to either adjust the the toni.dns role or y ll need to do the DNS settings manual before running these ansible role, cause SSL-Certificates for the domain and subdomain(s) will be issued automaticly anyway and therefore **all DNS entries of all used subdomains are required.** Set up DNS entries manualy at your dns server / provider if you are not using a server at hetzner **before you run the role.**
+You have to make sure that your domain can be resolved by DNS. For my tests i use `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later.
+SSL-Certificates for the domain and all needed subdomain(s) will be issued automaticly. (therefore **all DNS entries of all used subdomains are required.**)
+Set up DNS entries for all used domains / subdomains manualy at your dns server. If you wanna develope with this stack, create at least the following subdomains: (corteza, dev, admin, compose, workflow, reporter, discovery, privacy). Dont use other names for subdomains, cause these names are still hardcoded in some files, so it wont work out of the box.
+
+**These steps are described assuming your are root user on the ansible controller machine and that this machine has acccess to the vhost/dedicated server on which you wanna install corteza.**
 
 ## Settings
-
-Edit hosts file and adjust ansible_ssh_host to your server IP:
-```bash
-nano <inventories>/hosts
-```
+In this manual i expect y r using [toni.inventorie](https://github.com/tnissen375/toni.inventorie), you can use your own or adjust it to your needs. Make sure y r root on installer machine and the ssh key from the installer machine is added to the authorized keys on the target (corteza) server. 
 
 Edit role variables to fit your need:
 ```bash
-nano <inventories>/group_vars/all.yml
+nano /root/toni.inventorie/server/group_vars/targets.yml
 ```
 
 ```yaml
 ---
-domain: "" # <- Put you domainname here
-letsencrypt_email: "" # <- Put your email here
+domain: "" #<-- adjust
+letsencrypt_email: "" #<-- adjust
 # Mail account which is used not only for keycloak ;)
-# Examle gmail / google account needs to be allow insecure auth
+# gmail / google account needs to be allow insecure auth
 keycloak_smtp_password: # <- Put your email password here 
 keycloak_smtp_port: "587"
 keycloak_smtp_host: "smtp.gmail.com"
-keycloak_smtp_from: "jidumailer@gmail.com"
-keycloak_smtp_display_name: "Corteza|Toni-Media"
-keycloak_smtp_user: "jidumailer@gmail.com"
-openresty_session_secret: "623q4hR325t36VsC3Da3H7922IC0073T" #dummy <- replace with vault value
+keycloak_smtp_from: "<name>@gmail.com" #<-- adjust
+keycloak_smtp_display_name: "Corteza|<name>" #<-- adjust
+keycloak_smtp_user: "<name>@gmail.com" #<-- adjust
+openresty_session_secret: "623q4hR325t36VsC3Da3H7922IC0073T" #dummy <- to be replaced with vault value
 corteza_mysql_user: "corteza"
 corteza_mysql_db: "corteza"
-corteza_mysql_root_password: "pDsQ2Ahh4W2ojDb4vGeh05n" #dummy, replace with vault value
-corteza_mysql_password: "pDsQsg62AW2ojDb4vGeh05nxy" #dummy, replace with vault value
+corteza_mysql_root_password: "pDsQ2Ahh4W2ojDb4vGeh05n" #dummy, to be replaced with vault value
+corteza_mysql_password: "pDsQsg62AW2ojDb4vGeh05nxy" #dummy, to be replaced with vault value
 corteza_mysql_image: "percona:8.0"
-corteza_image_version: "2021.3.5"
-
-# Developement only
-host_ssh_port: 2224 # Access docker container by SSH 
-corteza_dev_enable: "false"
-corteza_dev_base_url: "dev.toni-media.com"
-corteza_dev_repository: "https://github.com/tnissen375/corteza-server.git"
-corteza_dev_version: "2021.3.x"
-corteza_app_enable: "false"
-corteza_app_repository: "https://github.com/tnissen375/corteza-webapp-compose.git"
-corteza_app_version: "2021.3.x"
-
-# only for use with hetzner DNS / autocreate DNS records for subdomains
-dns_create: false 
-dns_update: false 
-api_token: # only necessary if not set by toni.dns role
+corteza_image_version: "2023.3.0-dev.1"
+...
 ```
+Create vault file and change the vault secrets. See detailed instructions further down.
 
 ## Installation
 
-On the first run this role will build some "basic" docker images on the installer machine - no docker registry is needed. This has to be done only once (or when a new image version is needed) and takes several minutes due to creation of these images especially because of openresty/dhparam.
+I have droped the Infos on the role for building docker images in this role (for simplicity). The images used will be installed from dockerhub. If you need any Infos on building them with ansible drop me a line.
 
-The images are stored at your installer machine, p.e. WSL2 and transfered to target machines if needed. If you ever need to tigger or rebuild the images: 
-`ansible-playbook builder.yml -i <inventories> --vault-id corteza@vault`
-
-Normally install the ansible requirements and you are good to go. 
+Install the ansible requirements and you are good to go. 
 `ansible-galaxy install -r requirements.yml`
 
-If you have any doubts check the requirements-section at the end.
-
-### Basic setup (run once)
-```bash
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "build, host"
-```
+If you have any doubts or need to install ansible first, check the requirements-section at the end.
 
 ### Production
-Deploy complete production
+Deploy production setup. All commands run from within toni.corteza role dir if not stated otherwise.
+
+First we prepare the corteza host. Install packages, docker and the openresty proxy
 ```bash
-ansible-playbook install.yml -i <inventories> --vault-id corteza@vault --tags "corteza" --skip-tags "dev,app" --extra-vars "ansible_ssh_host=89.58.8.242"
+ansible-playbook host.yml -i ../toni.inventorie/server --vault-id corteza@vault --tags "host" --extra-vars "ansible_ssh_host=<YOUR SERVER IP HERE>"
 ```
 
-### Development corteza core
-Deploy developement branch, deploy_name corresponds to the subdomain where the app is deployed (make sure you set DNS records at your DNS-server). Specify extra-vars for repository if needed. Set extra var `corteza_webapp_enable=false` if you want to debug corteza apps.
+After installing the basics we are ready to install keycloak/corteza stack
+```bash
+ansible-playbook install.yml -i ../toni.inventorie/server --vault-id corteza@vault --tags "keycloak, kc_realm" --skip-tags "kc_role" --extra-vars "ansible_ssh_host=<YOUR SERVER IP HERE>"
+
+ansible-playbook install.yml -i ../toni.inventorie/server --vault-id corteza@vault --tags "corteza" --skip-tags "dev" --extra-vars "ansible_ssh_host=<YOUR SERVER IP HERE> keycloak_client_name=Corteza create_kc_role=true, create_kc_client=true, create_kc_user=true"
+```
+
+### Dev setup (core and apps)
+The core corteza server is deployed at dev. All apps are deployed to their subdomains mentioned above. If you do not want to dev any app, you could add the extra var `corteza_webapp_enable=true` on the install prompt, so that the apps are run from core dev container. (the deploy_name has to be dev - dont change!! Subdomain names are fixed atm, dont change)
+
+Fork the corteza server from [Github Corteza](https://github.com/cortezaproject/corteza.git) and change IP and Guthub User in the command below.
 
 ```bash
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, dev" --skip-tags "app" --extra-vars "deploy_name=dev corteza_webapp_enable=true corteza_dev_enable=true"
+ansible-playbook ./install.yml -i ../toni.inventorie/server --vault-id corteza@vault --tags "corteza, dev" --extra-vars "ansible_ssh_host=<YOUR SERVER IP HERE> keycloak_client_name=Corteza deploy_name=dev corteza_dev_enable=true corteza_webapp_enable=false corteza_dev_repository=https://github.com/<GITHUB USER>/corteza.git"
 ```
 
 ### Development corteza apps 
 
-You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
-Make sure you have created dns records for the subdomains.
-If you are using hetzner server this can be done automaticly, you have to specify your api tokens in inventory from toni.corteza or in toni.dns role:
-Change the <inventories> path in the examples accordingly to your ansible installation.
-
-Example with token from toni.dns role:
+You can connect VS Code to main corteza dev branch at port 2223, the apps can be reached:
 ```bash
-ansible-playbook ./install.yml -i <inventories> --vault-id dns@vault --vault-password-file ../toni.dns/vault --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=one
-corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-one.git corteza_app_version=2021.9.x host_ssh_port=2226 nginx_stack_keep_alive=true dns_create=true corteza_app_enable=true"
+admin. @port: 2400
+one.  @port: 2401
+compose. @port: 2402
+discovery. @port: 2403
+privacy. @port: 2404
+reporter. @port: 2405
+workflow. @port: 2406
 ```
+To make this work you only have to install an SSH key to access the host. This key will be used by all created dev container. So you dont have to worry about how to access the containers. Connect from VS Code with your host SSH key @ the mentioned Port above.
 
-Example with already (manual) setup dns records (apps: compose, admin and one), chosse different `host_ssh_port` for each app.
-```bash
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=compose corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-compose.git corteza_app_version=2021.9.x host_ssh_port=2224 nginx_stack_keep_alive=true corteza_app_enable=true"
-
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=admin corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-admin.git corteza_app_version=2021.9.x host_ssh_port=2225 nginx_stack_keep_alive=true corteza_app_enable=true"
-
-ansible-playbook ./install.yml -i <inventories> --vault-id corteza@vault --tags "corteza, app" --skip-tags "dev" --extra-vars "deploy_name=workflow
-corteza_app_repository=https://github.com/cortezaproject/corteza-webapp-workflow.git corteza_app_version=2021.9.x host_ssh_port=2227 nginx_stack_keep_alive=true corteza_app_enable=true"
-```
-
-You can deploy production and as many developement branches as desired (limited by server ressources) in parallel.
 Hopefully all went well and your corteza server and subdomains are ready.
 - Production: `corteza.<your domain>.com`, p.e. `corteza.toni-media.com`.
 - Development corteza core: `dev.<your domain>.com`, p.e. `dev.toni-media.com`.
-- Development corteza app: `compose.<your domain>.com`, p.e. `compose.toni-media.com`. 
+- Development corteza app: `one.<your domain>.com`, p.e. `one.toni-media.com`. 
 
 Feel free to contact me if any problems arise. ;)
 
 ## Commands for easy access
 
-Enter the desired stack installtion dir in user path. (p.e. `/root/dev`) and execute commands to your swarm node stack.
+Enter the desired stack installation dir in user path. (p.e. `/root/dev`) and execute commands to your swarm node stack. Have a look at the Makefile to get a list of all avail. commands.
 
 #### Backup
 
@@ -179,7 +162,7 @@ make execdb
 #### Setup server with ansible and vault
 
 In this example i use my windows machine with the linux subsystem as `ansible installer machine` which is responsible for deploy all online servers. 
-This ansible role is tested to work with ubuntu 20 so i would advice not to use any version below. There may be issues. You dont have to use WSL. You can use any ubuntu 20 cloud server too. I would recommend 4GB memory.
+This ansible role is tested to work with ubuntu 20 (root user) so i would advice not to use any version below. There may be issues. You dont have to use WSL. You can use any ubuntu 20 cloud server too. I would recommend 4GB memory.
 
 ```bash
 apt update
@@ -202,19 +185,20 @@ cd ~
 git clone https://github.com/tnissen375/toni.corteza.git
 cd toni.corteza
 ansible-galaxy install -r requirements.yml
-nano vault
+tr -dc A-Za-z0-9 </dev/urandom | head -c 64 > vault
 ```
 
-You will have to add a random string to the vault file if you want to use vault as i do in my examples. (STRG+X to end nano)  [More information on vault.](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
-Off course you can add all values in clear if you dont want to push your changes to your private git or if you dont care about security. Your decision ;)
+You can change that random string in the vault file or skip the step complete and add all values in clear to your conf files, but for security reasons you should never do that. Your decision ;)
+[More information on vault.](https://docs.ansible.com/ansible/latest/user_guide/vault.html)
+Backup the vault key, you ll need it whenever you want to reinstall or decrypt any of the secrets. Keep it in a safe place.
 
+The roles used to install corteza are not made for this purpose only. I m usin these roles as a universal base for installing a lot of different applications, normally behind an authenticating reverse proxy (openresty/nginx). Keycloak is smoothly integrates whith corteza in this setup stack, but corteza can be used / installed whithout if preffered.
+There may be vars in the conf files that did not do anything. Ignore. ;)
 
+Adjust the conf to your needs: 
 ```bash
-nano <inventories>/group_vars/all.yml
+nano <inventorie role dir>/server/group_vars/targets.yml
 ```
-
-The roles which are used to install corteza are not made for this purpose only. I m usin these roles as a universal base for installing a lot of different applications, normally behind an authenticating reverse proxy (openresty/nginx). By now i havent integrated keycloak in the corteza stack but its on my roadmap.
-So some variable may be unexpected but thats ok (at least for me) and maybe will make sense to you after i extend this role.
 
 ```yaml
 ---
@@ -264,8 +248,9 @@ ansible-vault encrypt_string --stdin-name 'corteza_mysql_root_password' --vault-
 ansible-vault encrypt_string --stdin-name 'corteza_mysql_password' --vault-id corteza@vault
 
 ansible-vault encrypt_string --stdin-name 'keycloak_smtp_password' --vault-id corteza@vault
-```
 
+aso...
+```
 Wanna have a look at the just stored values?
 Sure. Thats possible if you have the correct vault pass.
 
@@ -275,8 +260,8 @@ ansible localhost -m debug -a var="keycloak_smtp_password" -i <inventories> --va
 
 ## Debug with VS Code
 
-The whole installation is done on a single node swarm. By now the source code is checked out to and the host mounted to the docker dev container(s). You can install as many parallel versions as you like. (limited by server ressources). The versions are seperated and no ressources are shared, except service for generating PDFs.
-All containers are connected to the same network. The developement containers are accessable by SSH (only by private key). Install your public SSH-Key to the host and you will be able to access the development container as well. (Port 2223,...)
+The whole installation is done on a "single node" swarm. 
+All containers are connected to the corteza and/or the nginx network. The developement containers are accessable by SSH by (host) private key. Install your public SSH-Key to the host and you will be able to access the development container as well. (Port 2223,...)
 
 ### Core / Go
 [VS Code debugging go](https://github.com/golang/vscode-go/blob/master/docs/debugging.md)
@@ -286,7 +271,7 @@ If you havent switched the ssh port of the dev container you can connect to the 
 After doin so you can connect to your host and go to your dev folder:
 
 ```bash
-cd ~/cortezadev
+cd ~/dev
 make debug
 ```
 
@@ -294,7 +279,7 @@ Delve will be started in headless mode. If all went well you can start debugging
 Until than:
 
 ```bash
-cd ~/cortezadev
+cd ~/dev
 make rm
 make deploy
 make debug
@@ -313,8 +298,20 @@ https://devtools.vuejs.org/guide/installation.html
 - Guide on app creation 
 - Add postfix container
 - ~~Automate sink route~~
-- Add Route53 DNS
-- Add deployment for AWS
 - Automatic tests
 
 Any other ideas? Drop me a line.
+
+
+
+
+
+
+
+
+
+
+
+docker stop $(docker ps -a | grep "Up" | grep dev | awk '{print $1}')
+docker stack rm $(docker stack ls | grep dev | awk '{print $1}')
+docker volume rm $(docker volume ls | grep dev | awk '{print $2}')
