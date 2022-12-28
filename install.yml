@@ -15,7 +15,7 @@
         enable_corredor: true,
         enable_provision: true,
         #corteza_dev_version: "2023.3.0-dev.1",
-        include_auth: true,
+        include_auth: false, 
         create_stack_network: true,
         stack_subnet: "10.10.15.0/24",      
         tags: [ corteza ]

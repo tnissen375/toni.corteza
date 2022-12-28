@@ -108,7 +108,7 @@ server {
 {% endif %}
 
  location / {
-{% if include_auth is defined and include_auth|bool==true %}
+{% if include_auth is defined and include_auth|bool==true and (item.app is undefined or item.app=="")%}
   include snippets/{{ access_group }}_auth.conf;
 {% endif %}
 {% if include_xframe is defined and include_xframe|bool==true %}
