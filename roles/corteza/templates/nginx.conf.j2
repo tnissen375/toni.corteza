@@ -60,7 +60,7 @@ server {
   }
 {% endif %}
 
-{% if keycloak_auth is defined and keycloak_auth|bool==true%}
+{% if keycloak_auth is defined and keycloak_auth|bool==true and (item.app is undefined or item.app=="")%}
 {% if auth_proxy is defined and auth_proxy|bool==true %}
  location /auth/login {
    return 301 https://$host/auth/external/openid-connect.{{ auth_proxy_client }};
