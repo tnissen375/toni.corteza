@@ -301,17 +301,3 @@ https://devtools.vuejs.org/guide/installation.html
 - Automatic tests
 
 Any other ideas? Drop me a line.
-
-
-
-
-
-
-
-
-
-
-
-docker stop $(docker ps -a | grep "Up" | grep dev | awk '{print $1}')
-docker stack rm $(docker stack ls | grep dev | awk '{print $1}')
-docker volume rm $(docker volume ls | grep dev | awk '{print $2}')
