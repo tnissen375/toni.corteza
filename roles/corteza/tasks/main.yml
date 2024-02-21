@@ -260,6 +260,7 @@
     keycloak_role_name: "corteza"
   when: create_kc_client|default(false)
 
+# There is no update implemented!
 - name: Create Keycloak client role(s)
   include_role:
     name: toni.keycloak

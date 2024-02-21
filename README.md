@@ -1,16 +1,16 @@
 # toni.corteza
-Update to work with 2023.3.0-dev.1 (This role is not backwards compatible: works with 2022.9.4 and above)
+Update to work with 2023.9.3 (This role is not backwards compatible: works with 2022.9.4 and above)
 
 Ansible role to setup corteza low code plattform behind keycloak and openresty authenticating proxy. (all SSL certs created)
-Dev setup available, set up on seperated subdomains.
-The developement deployment is capable of debugging with VS Code (go core & node apps). Even if it is possible the documentation on debugging is still short right now. To be extended ;)
+Dev setup available(Tested on 2023.9.0-dev.1), set up on seperated subdomains.
+The developement deployment is capable of debugging with VS Code (go core & node apps). Even if it is possible the documentation on debugging is still short right now. To be extended. There are better ways doing setting up dev. ;)
 
 The roles which are used to install corteza are not made for this purpose only. I m using these roles as a universal base for installing a lot of different applications, normally behind an authenticating reverse proxy (openresty/nginx). This ansible role is capable of installing keycloak, creating keycloak configs and activate Oauth in Corteza (or dev).
 Some variable may be unexpected but thats ok (for me) and maybe not all vars beside described standard conf work for you.
 
 ### Domain / Subdomain
 
-You have to make sure that your domain can be resolved by DNS. For my tests i use `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later.
+You have to make sure that your domain can be resolved by DNS. For this writing i use `toni-media.com` and the subdomain `corteza.toni-media.com`. Write down the IP of your server, y ll need it later.
 SSL-Certificates for the domain and all needed subdomain(s) will be issued automaticly. (therefore **all DNS entries of all used subdomains are required.**)
 Set up DNS entries for all used domains / subdomains manualy at your dns server. If you wanna develope with this stack, create at least the following subdomains: (corteza, dev, admin, compose, workflow, reporter, discovery, privacy). Dont use other names for subdomains, cause these names are still hardcoded in some files, so it wont work out of the box.
 

@@ -2,7 +2,8 @@
 #  tags: [ build ]
 
 - hosts: targets
-  remote_user: root
+  remote_user: r2d2
+  become: yes
   gather_facts: yes
   tags: [ host ]
   roles:
@@ -35,7 +36,7 @@
       }
     - {
         role: toni.openresty,
-        openresty_image: "truespirit/openresty:1.21.4.1-alpine-fat",
+        openresty_image: "truespirit/openresty:1.25.3.1-alpine-fat",
         dockerhub_image: true,
         #force_images: true,
         tags: [ host, openresty ]

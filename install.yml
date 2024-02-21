@@ -1,15 +1,19 @@
 - hosts: targets
-  remote_user: root
+  remote_user: r2d2
+  become: yes
   gather_facts: yes
   roles:
     - {
         role: toni.keycloak, 
+        nginx_subdomain: "key.",
         auth_bypass: "true",
-        keycloak_image: "quay.io/keycloak/keycloak:20.0.2",
+        keycloak_image: "quay.io/keycloak/keycloak:23.0.6",
         tags: [ keycloak ]     
       }
     - { 
         role: corteza,
+        nginx_subdomain: "corteza.",
+        keycloak_server: "key.{{ domain }}",
         existing_certs: 'false',
         #corteza_image_version: "2023.3.0-dev.1",
         enable_corredor: true,

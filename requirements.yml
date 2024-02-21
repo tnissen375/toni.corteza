@@ -19,4 +19,4 @@ roles:
    src: git+https://github.com/tnissen375/toni.dns.git
  - name: toni.keycloak
    src: git+https://github.com/tnissen375/toni.keycloak.git
-   version: 1efa1d20a6b8596da2273d3ef9b3acc7d2219b9b
+   version: fcfbbaf9cdfe6cfca3df9aaaf4c093e59b7cc1e3

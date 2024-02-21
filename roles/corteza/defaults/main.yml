@@ -38,7 +38,7 @@ include_auth: "false"
 include_xframe: "false" #Nextcloud with Only Office in corteza dashboard
 access_group: "corteza"
 corteza_mysql_image: "percona:8.0"
-corteza_image_version: "2022.9.4"
+corteza_image_version: "2023.9.3"
 corteza_image: "cortezaproject/corteza:{{ corteza_image_version }}"
 corredor_image: "cortezaproject/corteza-server-corredor:{{ corteza_image_version }}"
 #corteza_image: "cortezaproject/corteza-server:{{ corteza_image_version }}"
